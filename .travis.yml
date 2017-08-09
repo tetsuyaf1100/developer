@@ -1,0 +1,8 @@
+language: ruby
+rvm:
+  - 2.4
+sudo: false
+install: gem install jekyll github-pages mdl html-proofer
+script:
+  - mdl docs
+  - bundle exec jekyll build --source docs && htmlproofer _site
