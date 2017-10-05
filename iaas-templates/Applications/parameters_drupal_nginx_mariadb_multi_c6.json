@@ -1,0 +1,8 @@
+    "parameters": {
+        "keypair_name": "ci-env",
+        "availability_zone": "jp-east-1a",
+        "network_id_drupal_nginx": "6dd2a528-503b-4bee-9117-500d79e5550e",
+        "subnet_id_drupal_nginx": "21e55f8e-c2b4-4520-a346-e9d6af155073",
+        "network_id_mariadb": "6dd2a528-503b-4bee-9117-500d79e5550e",
+        "subnet_id_mariadb": "21e55f8e-c2b4-4520-a346-e9d6af155073"
+    }

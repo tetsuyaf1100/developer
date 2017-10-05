@@ -1,0 +1,349 @@
+heat_template_version: 2013-05-23
+
+description: MariaDB Galera Cluster Multi CentOS 6
+
+parameters:
+  keypair_name:
+    type: string
+    label: keypair_name for all servers
+    description: k5user keypair for all servers
+
+  availability_zone:
+    type: string
+    label: availability_zone
+    description: existing availability_zone
+
+  dns_nameservers:
+    type: comma_delimited_list
+    description: dns name servers.
+    default: ['133.162.193.9', '133.162.193.10']
+
+  network_id_mariadb_galeracluster1:
+    type: string
+    label: Network ID
+    description: existing network id
+
+  subnet_id_mariadb_galeracluster1:
+    type: string
+    label: Subnet ID
+    description: existing subnet id
+
+  network_id_mariadb_galeracluster2:
+    type: string
+    label: Network ID for DB
+    description: existing network id
+
+  subnet_id_mariadb_galeracluster2:
+    type: string
+    label: Subnet ID for DB
+    description: existing subnet id
+
+  remote_host_cidr:
+    type: string
+    label: Host CIDR
+    description: existing remote Host CIDR
+    default: 0.0.0.0/0
+
+  flavor:
+    type: string
+    label: Flavor
+    default: S-1
+
+resources:
+  mariadb_galeracluster_multi_1_c6:
+    type: OS::Nova::Server
+    properties:
+      name: mariadb_galeracluster_multi_1_c6
+      key_name: { get_param: keypair_name }
+      availability_zone: { get_param: availability_zone }
+      block_device_mapping:
+      - device_name: vda
+        volume_id: {get_resource: mariadb_galeracluster_multi_1_c6_systemvolume}
+      flavor: { get_param: flavor }
+      networks: [{"port": { get_resource: mariadb_galeracluster_multi_1_c6_port }}]
+      scheduler_hints: {"group": { get_resource: mariadb_galeracluster_multi_server_group }}
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #cloud-config
+            write_files:
+            - path: /root/install.sh
+              permissions: '0755'
+              owner: root:root
+              content: |
+                #!/bin/bash
+                echo -e '----Start installing MariaDB Cluster1---\n\n'
+                yum -y update
+                yum -y install nc
+
+                echo -e '--Install MariaDB 10.1--\n'
+                cat >> /etc/yum.repos.d/MariaDB.repo << 'EOS'
+                [mariadb]
+                name = MariaDB
+                baseurl = http://yum.mariadb.org/10.1/centos6-amd64
+                gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+                gpgcheck=1
+                EOS
+
+                yum -y install MariaDB-server MariaDB-devel MariaDB-common MariaDB-client
+                service mysql start
+
+                cat >> /etc/my.cnf << 'EOS'
+
+                [mysqld]
+                character-set-server=utf8
+                [client]
+                default-character-set=utf8
+                EOS
+
+                cat >> /etc/my.cnf.d/server.cnf  << 'EOF'
+                [mysqld]
+                # 1. Mandatory settings
+                query_cache_size=0
+                binlog_format=ROW
+                default_storage_engine=InnoDB
+                innodb_autoinc_lock_mode=2
+                innodb_locks_unsafe_for_binlog=1
+                # 2. Optional mysqld settings
+                innodb_buffer_pool_size=128M
+                innodb_log_file_size=8M
+                innodb_file_per_table
+                innodb_flush_log_at_trx_commit=2
+                # 3. wsrep provider configuration
+                wsrep_on=ON
+                wsrep_provider=/usr/lib64/galera/libgalera_smm.so
+                wsrep_cluster_address=gcomm://$mariadb_galeracluster_multi_1_c6_IPADDR,$mariadb_galeracluster_multi_2_c6_IPADDR
+                wsrep_cluster_name='MariaDB_GALERA_CLUSTER'
+                wsrep_node_name='mariadb_galeracluster_multi_1_c6'
+                wsrep_node_address='$mariadb_galeracluster_multi_1_c6_IPADDR'
+                wsrep_sst_method=rsync
+                log-error = mariadb_galera_cluster_error.log
+                EOF
+
+                echo -e '--Disable SELinux--\n'
+                setsebool -P httpd_can_network_connect on
+                setenforce 0
+                sed -i "s|^SELINUX=.*$|SELINUX=disabled|" /etc/selinux/config
+
+                echo -e '--Start services--\n'
+                service mysql stop
+                chkconfig mysql on
+                service mysql start --wsrep-new-cluster
+
+            runcmd:
+              - cat /root/install.sh > /var/log/install.log
+              - echo -e "\n-- installer log --\n" >> /var/log/install.log
+              - /root/install.sh 1>> /var/log/install.log 2>&1
+
+          params:
+            $mariadb_galeracluster_multi_1_c6_IPADDR: { get_attr: [ mariadb_galeracluster_multi_1_c6_port, fixed_ips, 0, ip_address ] }
+            $mariadb_galeracluster_multi_2_c6_IPADDR: { get_attr: [ mariadb_galeracluster_multi_2_c6_port, fixed_ips, 0, ip_address ] }
+
+  mariadb_galeracluster_multi_1_c6_port:
+    type: OS::Neutron::Port
+    properties:
+      name: mariadb_galeracluster_multi_1_c6_port
+      network_id: { get_param: network_id_mariadb_galeracluster1 }
+      availability_zone: { get_param: availability_zone }
+      security_groups:
+        - { get_resource: mariadb_galeracluster_multi_security_group }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id_mariadb_galeracluster1 }
+
+  mariadb_galeracluster_multi_1_c6_systemvolume:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      description:
+      image: CentOS 6.5 64bit (English) 05
+      name: mariadb_galeracluster_multi_1_c6_systemvolume
+      size: 30
+      volume_type: M1
+
+
+  mariadb_galeracluster_multi_2_c6:
+    type: OS::Nova::Server
+    properties:
+      name: mariadb_galeracluster_multi_2_c6
+      key_name: { get_param: keypair_name }
+      availability_zone: { get_param: availability_zone }
+      block_device_mapping:
+      - device_name: vda
+        volume_id: {get_resource: mariadb_galeracluster_multi_2_c6_systemvolume }
+      flavor: { get_param: flavor }
+      networks: [{"port": { get_resource: mariadb_galeracluster_multi_2_c6_port }}]
+      scheduler_hints: {"group": { get_resource: mariadb_galeracluster_multi_server_group }}
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #cloud-config
+            write_files:
+            - path: /root/install.sh
+              permissions: '0755'
+              owner: root:root
+              content: |
+                #!/bin/bash
+                echo -e '----Start installing MariaDB Cluster2---\n\n'
+                yum -y update
+                yum -y install nc
+
+                echo -e '--Wait to make Cluster1 server--\n'
+                i=0
+                until nc -z $mariadb_galeracluster_multi_1_c6_IPADDR 3306
+                do
+                    if [ $i -gt 500 ]; then
+                      break
+                    fi
+                    sleep 5
+                    i=$(($i+1))
+                done
+                sleep 10
+
+                echo -e '--Install MariaDB 10.1--\n'
+                cat >> /etc/yum.repos.d/MariaDB.repo << 'EOS'
+                [mariadb]
+                name = MariaDB
+                baseurl = http://yum.mariadb.org/10.1/centos6-amd64
+                gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+                gpgcheck=1
+                EOS
+
+                yum -y install MariaDB-server MariaDB-devel MariaDB-common MariaDB-client
+                service mysql start
+
+                cat >> /etc/my.cnf << 'EOS'
+
+                [mysqld]
+                character-set-server=utf8
+                [client]
+                default-character-set=utf8
+                EOS
+
+                cat >> /etc/my.cnf.d/server.cnf  << 'EOF'
+                [mysqld]
+                # 1. Mandatory settings
+                query_cache_size=0
+                binlog_format=ROW
+                default_storage_engine=InnoDB
+                innodb_autoinc_lock_mode=2
+                innodb_locks_unsafe_for_binlog=1
+                # 2. Optional mysqld settings
+                innodb_buffer_pool_size=128M
+                innodb_log_file_size=8M
+                innodb_file_per_table
+                innodb_flush_log_at_trx_commit=2
+                # 3. wsrep provider configuration
+                wsrep_on=ON
+                wsrep_provider=/usr/lib64/galera/libgalera_smm.so
+                wsrep_cluster_address=gcomm://$mariadb_galeracluster_multi_1_c6_IPADDR,$mariadb_galeracluster_multi_2_c6_IPADDR
+                wsrep_cluster_name='MariaDB_GALERA_CLUSTER'
+                wsrep_node_name='mariadb_galeracluster_multi_2_c6'
+                wsrep_node_address='$mariadb_galeracluster_multi_2_c6_IPADDR'
+                wsrep_sst_method=rsync
+                log-error = mariadb_galera_cluster_error.log
+                EOF
+
+                echo -e '--Disable SELinux--\n'
+                setsebool -P httpd_can_network_connect on
+                setenforce 0
+                sed -i "s|^SELINUX=.*$|SELINUX=disabled|" /etc/selinux/config
+
+                echo -e '--Start services--\n'
+                service mysql stop
+                chkconfig mysql on
+                service mysql start
+
+            runcmd:
+              - cat /root/install.sh > /var/log/install.log
+              - echo -e "\n-- installer log --\n" >> /var/log/install.log
+              - /root/install.sh 1>> /var/log/install.log 2>&1
+
+          params:
+            $mariadb_galeracluster_multi_1_c6_IPADDR: { get_attr: [ mariadb_galeracluster_multi_1_c6_port, fixed_ips, 0, ip_address ] }
+            $mariadb_galeracluster_multi_2_c6_IPADDR: { get_attr: [ mariadb_galeracluster_multi_2_c6_port, fixed_ips, 0, ip_address ] }
+
+  mariadb_galeracluster_multi_2_c6_port:
+    type: OS::Neutron::Port
+    properties:
+      name: mariadb_galeracluster_multi_2_c6_port
+      network_id: { get_param: network_id_mariadb_galeracluster2 }
+      availability_zone: { get_param: availability_zone }
+      security_groups:
+        - { get_resource: mariadb_galeracluster_multi_security_group }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id_mariadb_galeracluster2 }
+
+  mariadb_galeracluster_multi_2_c6_systemvolume:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      description:
+      image: CentOS 6.5 64bit (English) 05
+      name: mariadb_galeracluster_multi_2_c6_systemvolume
+      size: 30
+      volume_type: M1
+
+  mariadb_galeracluster_multi_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: mariadb_galeracluster_multi_security_group
+      rules:
+        # ICMP
+        - { direction: ingress, ethertype: IPv4, protocol: icmp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # SSH
+        - { direction: ingress, ethertype: IPv4, port_range_min: 22, port_range_max: 22, protocol: tcp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # HTTP
+        - { direction: egress, ethertype: IPv4, port_range_min: 80, port_range_max: 80, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # HTTPS
+        - { direction: egress, ethertype: IPv4, port_range_min: 443, port_range_max: 443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # DNS
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        # metadata
+        - { direction: egress, port_range_max: 80, port_range_min: 80, protocol: tcp, remote_ip_prefix: 169.254.169.254/32 }
+        # add following item for test
+        - { direction: egress,  ethertype: IPv4, protocol: icmp, remote_ip_prefix: 0.0.0.0/0 }
+        # MariaDB For Mysql client connections
+        - { direction: ingress, ethertype: IPv4, port_range_min: 3306, port_range_max: 3306, protocol: tcp, remote_ip_prefix: 172.20.1.0/24 }
+        - { direction: ingress, ethertype: IPv4, port_range_min: 3306, port_range_max: 3306, protocol: tcp, remote_ip_prefix: 172.20.2.0/24 }
+        - { direction: egress,  ethertype: IPv4, port_range_min: 3306, port_range_max: 3306, protocol: tcp, remote_ip_prefix: 172.20.2.0/24 }
+        # MariaDB For Galera Cluster replication traffic
+        - { direction: ingress, ethertype: IPv4, port_range_min: 4567, port_range_max: 4567, protocol: tcp, remote_ip_prefix: 172.20.1.0/24 }
+        - { direction: ingress, ethertype: IPv4, port_range_min: 4567, port_range_max: 4567, protocol: tcp, remote_ip_prefix: 172.20.2.0/24 }
+        - { direction: egress,  ethertype: IPv4, port_range_min: 4567, port_range_max: 4567, protocol: tcp, remote_ip_prefix: 172.20.2.0/24 }
+        # MariaDB For Incremental State Transfer
+        - { direction: ingress, ethertype: IPv4, port_range_min: 4568, port_range_max: 4568, protocol: tcp, remote_ip_prefix: 172.20.1.0/24 }
+        - { direction: ingress, ethertype: IPv4, port_range_min: 4568, port_range_max: 4568, protocol: tcp, remote_ip_prefix: 172.20.2.0/24 }
+        - { direction: egress,  ethertype: IPv4, port_range_min: 4568, port_range_max: 4568, protocol: tcp, remote_ip_prefix: 172.20.2.0/24 }
+        # MariaDB For all other State Snapshot Transfer
+        - { direction: ingress, ethertype: IPv4, port_range_min: 4444, port_range_max: 4444, protocol: tcp, remote_ip_prefix: 172.20.1.0/24 }
+        - { direction: ingress, ethertype: IPv4, port_range_min: 4444, port_range_max: 4444, protocol: tcp, remote_ip_prefix: 172.20.2.0/24 }
+        - { direction: egress,  ethertype: IPv4, port_range_min: 4444, port_range_max: 4444, protocol: tcp, remote_ip_prefix: 172.20.2.0/24 }
+
+  mariadb_galeracluster_multi_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      name: mariadb_galeracluster_multi_server_group
+      availability_zone: { get_param: availability_zone }
+      policies: [anti-affinity]
+
+outputs:
+  mariadb_galeracluster_multi_1_c6_URL:
+    value:
+      str_replace:
+        template: http://$ADDRESS/
+        params:
+          $ADDRESS: { get_attr: [ mariadb_galeracluster_multi_1_c6_port, fixed_ips, 0, ip_address ] }
+    description: mariadb_galeracluster_multi_1_c6 URL
+
+  mariadb_galeracluster_multi_2_c6_URL:
+    value:
+      str_replace:
+        template: http://$ADDRESS/
+        params:
+          $ADDRESS: { get_attr: [ mariadb_galeracluster_multi_2_c6_port, fixed_ips, 0, ip_address ] }
+    description: mariadb_galeracluster_multi_2_c6 URL

@@ -1,0 +1,475 @@
+heat_template_version: 2013-05-23
+
+description: PostgreSQL Cluster Multi CentOS 6
+
+parameters:
+  keypair_name:
+    type: string
+    label: keypair_name for all servers
+    description: k5user keypair for all servers
+
+  availability_zone:
+    type: string
+    label: availability_zone
+    description: existing availability_zone
+
+  dns_nameservers:
+    type: comma_delimited_list
+    description: dns name servers.
+    default: ['133.162.193.9', '133.162.193.10']
+
+  network_id_postgre_cluster1:
+    type: string
+    label: Network ID 1
+    description: existing network id 1
+
+  subnet_id_postgre_cluster1:
+    type: string
+    label: Subnet ID 1
+    description: existing subnet id 1
+
+  network_id_postgre_cluster2:
+    type: string
+    label: Network ID 2
+    description: existing network id 2
+
+  subnet_id_postgre_cluster2:
+    type: string
+    label: Subnet ID 2
+    description: existing subnet id 2
+
+  network_id_postgre_cluster3:
+    type: string
+    label: Network ID 3
+    description: existing network id 3
+
+  subnet_id_postgre_cluster3:
+    type: string
+    label: Subnet ID 3
+    description: existing subnet id 3
+
+  remote_host_cidr:
+    type: string
+    label: Host CIDR
+    description: existing remote Host CIDR
+    default: 0.0.0.0/0
+
+  cluster1_host_cider:
+    type: string
+    label: Host CIDR
+    description: existing remote Host CIDR
+    default: 0.0.0.0/0
+
+  cluster2_host_cider:
+    type: string
+    label: Host CIDR
+    description: existing remote Host CIDR
+    default: 0.0.0.0/0
+
+  cluster3_host_cider:
+    type: string
+    label: Host CIDR
+    description: existing remote Host CIDR
+    default: 0.0.0.0/0
+
+  flavor:
+    type: string
+    label: Flavor
+    default: S-1
+
+resources:
+  postgresql_cluster_multi_1_c6:
+    type: OS::Nova::Server
+    properties:
+      name: postgresql_cluster_multi_1_c6
+      key_name: { get_param: keypair_name }
+      availability_zone: { get_param: availability_zone }
+      block_device_mapping:
+      - device_name: vda
+        volume_id: {get_resource: postgresql_cluster_multi_1_c6_systemvolume }
+      flavor: { get_param: flavor }
+      networks: [{"port": { get_resource: postgresql_cluster_multi_1_c6_port }}]
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #cloud-config
+            write_files:
+            - path: /root/install.sh
+              permissions: '0755'
+              owner: root:root
+              content: |
+                #!/bin/bash
+                echo -e '----Start installing Master cluster----\n\n'
+                yum -y update
+                yum -y install nc
+
+                echo -e '--Configure YUM repository--\n'
+                sed -i '/^#released updates.*$/i \\nexclude=postgresql*\n' /etc/yum.repos.d/CentOS-Base.repo
+                sed -i '/^#additional packages that may be useful.*$/i \\nexclude=postgresql*\n' /etc/yum.repos.d/CentOS-Base.repo
+
+                echo -e '--Install Postgres repository for Postgres 9.5--\n'
+                yum -y localinstall http://yum.postgresql.org/9.5/redhat/rhel-6-x86_64/pgdg-centos95-9.5-2.noarch.rpm
+
+                echo -e '--Install Postgres 9.5--\n'
+                yum -y install postgresql95 postgresql95-server postgresql95-devel postgresql95-contrib
+
+                echo -e '--Service start--\n'
+                service postgresql-9.5 initdb
+                service postgresql-9.5 start
+                chkconfig postgresql-9.5 on
+
+                cp /var/lib/pgsql/9.5/data/pg_hba.conf /var/lib/pgsql/9.5/data/pg_hba.conf_ORG
+                cp /var/lib/pgsql/9.5/data/postgresql.conf /var/lib/pgsql/9.5/data/postgresql.conf_ORG
+
+                echo -e '--Modify pg_hba.conf 1--\n'
+                sed -i 's| peer$|trust|' /var/lib/pgsql/9.5/data/pg_hba.conf
+                sed -i 's|ident$|trust|' /var/lib/pgsql/9.5/data/pg_hba.conf
+
+                echo -e '--Create repliction role--\n'
+                runuser -l postgres -c "/usr/pgsql-9.5/bin/psql -c \"CREATE ROLE root WITH SUPERUSER REPLICATION CREATEDB CREATEROLE LOGIN;\""
+                runuser -l postgres -c "/usr/pgsql-9.5/bin/psql -c \"CREATE DATABASE root OWNER root;\""
+                psql -c "CREATE ROLE replication_user WITH SUPERUSER REPLICATION CREATEDB CREATEROLE LOGIN PASSWORD 'replication_user_password';"
+                psql -c "CREATE DATABASE replication_user OWNER replication_user;"
+
+                echo -e '--Modify pg_hba.conf 2--\n'
+                cat >>  /var/lib/pgsql/9.5/data/pg_hba.conf << "EOS"
+                host    replication     replication_user        127.0.0.1/32       trust
+                host    replication     replication_user        $postgresql_cluster_multi_1_c6_IPADDR/32  trust
+                host    replication     replication_user        $postgresql_cluster_multi_2_c6_IPADDR/32  trust
+                host    replication     replication_user        $postgresql_cluster_multi_3_c6_IPADDR/32  trust
+                EOS
+
+                mkdir -p /var/lib/pgsql/9.5/archive/
+                chown -R postgres:postgres /var/lib/pgsql/9.5/archive/
+
+                echo -e '--Modify postgresql.conf--\n'
+                cat >> /var/lib/pgsql/9.5/data/postgresql.conf << "EOS"
+                wal_level = hot_standby
+                synchronous_commit = on
+                max_wal_senders = 3
+                synchronous_standby_names = 'DB2,DB3'
+                archive_mode = on
+                archive_command = 'cp -i %p /var/lib/pgsql/9.5/archive/%f'
+                listen_addresses = '*'
+                EOS
+
+                chown -R postgres:postgres /var/lib/pgsql/9.5/
+
+                echo -e '--Service restart--\n'
+                service postgresql-9.5 restart
+
+            runcmd:
+              - cat /root/install.sh > /var/log/install.log
+              - echo -e "\n-- installer log --\n" >> /var/log/install.log
+              - /root/install.sh >> /var/log/install.log
+
+          params:
+            $postgresql_cluster_multi_1_c6_IPADDR: { get_attr: [ postgresql_cluster_multi_1_c6_port , fixed_ips, 0, ip_address ] }
+            $postgresql_cluster_multi_2_c6_IPADDR: { get_attr: [ postgresql_cluster_multi_2_c6_port , fixed_ips, 0, ip_address ] }
+            $postgresql_cluster_multi_3_c6_IPADDR: { get_attr: [ postgresql_cluster_multi_3_c6_port , fixed_ips, 0, ip_address ] }
+
+  postgresql_cluster_multi_1_c6_port:
+    type: OS::Neutron::Port
+    properties:
+      name: postgresql_cluster_multi_1_c6_port
+      network_id: { get_param: network_id_postgre_cluster1 }
+      availability_zone: { get_param: availability_zone }
+      security_groups:
+        - { get_resource: postgresql_cluster_multi_c6_common_security_group }
+        - { get_resource: postgresql_cluster_multi_1_c6_cluster_security_group }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id_postgre_cluster1 }
+
+  postgresql_cluster_multi_1_c6_systemvolume:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      description:
+      image: CentOS 6.5 64bit (English) 05
+      name: postgresql_cluster_multi_1_c6_systemvolume
+      size: 30
+      volume_type: M1
+
+  postgresql_cluster_multi_2_c6:
+    type: OS::Nova::Server
+    properties:
+      name: postgresql_cluster_multi_2_c6
+      key_name: { get_param: keypair_name }
+      availability_zone: { get_param: availability_zone }
+      block_device_mapping:
+      - device_name: vda
+        volume_id: {get_resource: postgresql_cluster_multi_2_c6_systemvolume }
+      flavor: { get_param: flavor }
+      networks: [{"port": { get_resource: postgresql_cluster_multi_2_c6_port }}]
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #cloud-config
+            write_files:
+            - path: /root/install.sh
+              permissions: '0755'
+              owner: root:root
+              content: |
+                #!/bin/bash
+                echo -e '----Start installing Slave cluster 1----\n\n'
+                yum -y update
+                yum -y install nc
+
+                i=0
+                until nc -z $postgresql_cluster_multi_1_c6_IPADDR 5432
+                do
+                    if [ $i -gt 500 ]; then
+                      break
+                    fi
+                    sleep 5
+                    i=$(($i+1))
+                done
+                sleep 10
+
+                echo -e '--Configure YUM repository--\n'
+                sed -i '/^#released updates.*$/i \\nexclude=postgresql*\n' /etc/yum.repos.d/CentOS-Base.repo
+                sed -i '/^#additional packages that may be useful.*$/i \\nexclude=postgresql*\n' /etc/yum.repos.d/CentOS-Base.repo
+
+                echo -e '--Install Postgres repository for Postgres 9.5--\n'
+                yum -y localinstall http://yum.postgresql.org/9.5/redhat/rhel-6-x86_64/pgdg-centos95-9.5-2.noarch.rpm
+
+                echo -e '--Install Postgres 9.5--\n'
+                yum -y install postgresql95 postgresql95-server postgresql95-devel postgresql95-contrib
+
+                echo -e '--Copy DB from cluster1 to cluster2--\n'
+                pg_basebackup -h $postgresql_cluster_multi_1_c6_IPADDR -U replication_user -D /var/lib/pgsql/9.5/data/ --xlog
+                \cp -f /var/lib/pgsql/9.5/data/pg_hba.conf_ORG /var/lib/pgsql/9.5/data/pg_hba.conf
+                \cp -f /var/lib/pgsql/9.5/data/postgresql.conf_ORG /var/lib/pgsql/9.5/data/postgresql.conf
+
+                echo -e '--Modify recovery.conf--\n'
+                cp /usr/pgsql-9.5/share/recovery.conf.sample /var/lib/pgsql/9.5/data/recovery.conf
+                cat >> /var/lib/pgsql/9.5/data/recovery.conf << "EOS"
+                standby_mode = 'on'
+                primary_conninfo = 'host=$postgresql_cluster_multi_1_c6_IPADDR port=5432 user=replication_user password=replication_user_password application_name=DB2'
+                EOS
+
+                echo -e '--Modify postgresql.conf--\n'
+                cat >> /var/lib/pgsql/9.5/data/postgresql.conf << "EOS"
+                hot_standby = on
+                EOS
+
+                echo -e '--Change owner under /var/lib/pgsql/9.5/--\n'
+                chown -R postgres:postgres /var/lib/pgsql/9.5/
+
+                echo -e '--Service restart--\n'
+                service postgresql-9.5 start
+                chkconfig postgresql-9.5 on
+
+            runcmd:
+              - cat /root/install.sh > /var/log/install.log
+              - echo -e "\n-- installer log --\n" >> /var/log/install.log
+              - /root/install.sh >> /var/log/install.log
+
+          params:
+            $postgresql_cluster_multi_1_c6_IPADDR: { get_attr: [ postgresql_cluster_multi_1_c6_port , fixed_ips, 0, ip_address ] }
+
+  postgresql_cluster_multi_2_c6_port:
+    type: OS::Neutron::Port
+    properties:
+      name: postgresql_cluster_multi_2_c6_port
+      network_id: { get_param: network_id_postgre_cluster2 }
+      availability_zone: { get_param: availability_zone }
+      security_groups:
+        - { get_resource: postgresql_cluster_multi_c6_common_security_group }
+        - { get_resource: postgresql_cluster_multi_2_c6_cluster_security_group }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id_postgre_cluster2 }
+
+  postgresql_cluster_multi_2_c6_systemvolume:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      description:
+      image: CentOS 6.5 64bit (English) 05
+      name: postgresql_cluster_multi_2_c6_systemvolume
+      size: 30
+      volume_type: M1
+
+  postgresql_cluster_multi_3_c6:
+    type: OS::Nova::Server
+    properties:
+      name: postgresql_cluster_multi_3_c6
+      key_name: { get_param: keypair_name }
+      availability_zone: { get_param: availability_zone }
+      block_device_mapping:
+      - device_name: vda
+        volume_id: {get_resource: postgresql_cluster_multi_3_c6_systemvolume }
+      flavor: { get_param: flavor }
+      networks: [{"port": { get_resource: postgresql_cluster_multi_3_c6_port }}]
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #cloud-config
+            write_files:
+            - path: /root/install.sh
+              permissions: '0755'
+              owner: root:root
+              content: |
+                #!/bin/bash
+                echo -e '----Start installing Slave cluster 2----\n\n'
+                yum -y update
+                yum -y install nc
+
+                i=0
+                until nc -z $postgresql_cluster_multi_2_c6_IPADDR 5432
+                do
+                    if [ $i -gt 500 ]; then
+                      break
+                    fi
+                    sleep 5
+                    i=$(($i+1))
+                done
+                sleep 10
+
+                echo -e '--Configure YUM repository--\n'
+                sed -i '/^#released updates.*$/i \\nexclude=postgresql*\n' /etc/yum.repos.d/CentOS-Base.repo
+                sed -i '/^#additional packages that may be useful.*$/i \\nexclude=postgresql*\n' /etc/yum.repos.d/CentOS-Base.repo
+
+                echo -e '--Install Postgres repository for Postgres 9.5--\n'
+                yum -y localinstall http://yum.postgresql.org/9.5/redhat/rhel-6-x86_64/pgdg-centos95-9.5-2.noarch.rpm
+
+                echo -e '--Install Postgres 9.5--\n'
+                yum -y install postgresql95 postgresql95-server postgresql95-devel postgresql95-contrib
+
+                echo -e '--Copy DB from cluster1 to cluster3--\n'
+                pg_basebackup -h $postgresql_cluster_multi_1_c6_IPADDR -U replication_user -D /var/lib/pgsql/9.5/data/ --xlog
+                \cp -f /var/lib/pgsql/9.5/data/pg_hba.conf_ORG /var/lib/pgsql/9.5/data/pg_hba.conf
+                \cp -f /var/lib/pgsql/9.5/data/postgresql.conf_ORG /var/lib/pgsql/9.5/data/postgresql.conf
+
+                echo -e '--Modify recovery.conf--\n'
+                cp /usr/pgsql-9.5/share/recovery.conf.sample /var/lib/pgsql/9.5/data/recovery.conf
+                cat >> /var/lib/pgsql/9.5/data/recovery.conf << "EOS"
+                standby_mode = 'on'
+                primary_conninfo = 'host=$postgresql_cluster_multi_1_c6_IPADDR port=5432 user=replication_user password=replication_user_password application_name=DB3'
+                EOS
+
+                echo -e '--Modify postgresql.conf--\n'
+                cat >> /var/lib/pgsql/9.5/data/postgresql.conf << "EOS"
+                hot_standby = on
+                EOS
+
+                echo -e '--Change owner under /var/lib/pgsql/9.5/--\n'
+                chown -R postgres:postgres /var/lib/pgsql/9.5/
+
+                echo -e '--Service restart--\n'
+                service postgresql-9.5 start
+                chkconfig postgresql-9.5 on
+
+            runcmd:
+              - cat /root/install.sh > /var/log/install.log
+              - echo -e "\n-- installer log --\n" >> /var/log/install.log
+              - /root/install.sh >> /var/log/install.log
+
+          params:
+            $postgresql_cluster_multi_1_c6_IPADDR: { get_attr: [ postgresql_cluster_multi_1_c6_port , fixed_ips, 0, ip_address ] }
+            $postgresql_cluster_multi_2_c6_IPADDR: { get_attr: [ postgresql_cluster_multi_2_c6_port , fixed_ips, 0, ip_address ] }
+
+  postgresql_cluster_multi_3_c6_port:
+    type: OS::Neutron::Port
+    properties:
+      name: postgresql_cluster_multi_3_c6_port
+      network_id: { get_param: network_id_postgre_cluster3 }
+      availability_zone: { get_param: availability_zone }
+      security_groups:
+        - { get_resource: postgresql_cluster_multi_c6_common_security_group }
+        - { get_resource: postgresql_cluster_multi_3_c6_cluster_security_group }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id_postgre_cluster3 }
+
+  postgresql_cluster_multi_3_c6_systemvolume:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      description:
+      image: CentOS 6.5 64bit (English) 05
+      name: postgresql_cluster_multi_3_c6_systemvolume
+      size: 30
+      volume_type: M1
+
+  postgresql_cluster_multi_c6_common_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: postgresql_cluster_multi_c6_common_security_group
+      rules:
+        # ICMP
+        - { direction: ingress, ethertype: IPv4, protocol: icmp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # SSH
+        - { direction: ingress, ethertype: IPv4, port_range_min: 22, port_range_max: 22, protocol: tcp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # HTTP
+        - { direction: egress, ethertype: IPv4, port_range_min: 80, port_range_max: 80, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # HTTPS
+        - { direction: egress, ethertype: IPv4, port_range_min: 443, port_range_max: 443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # DNS
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        # metadata
+        - { direction: egress, port_range_max: 80, port_range_min: 80, protocol: tcp, remote_ip_prefix: 169.254.169.254/32 }
+
+
+  postgresql_cluster_multi_1_c6_cluster_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: postgresql_cluster_multi_1_c6_cluster_security_group
+      rules:
+        # for cluster
+        - { direction: ingress, port_range_max: 5432, port_range_min: 5432, protocol: tcp, remote_ip_prefix: { get_param: cluster2_host_cider } }
+        - { direction: egress,  port_range_max: 5432, port_range_min: 5432, protocol: tcp, remote_ip_prefix: { get_param: cluster2_host_cider } }
+        - { direction: ingress, port_range_max: 5432, port_range_min: 5432, protocol: tcp, remote_ip_prefix: { get_param: cluster3_host_cider } }
+        - { direction: egress,  port_range_max: 5432, port_range_min: 5432, protocol: tcp, remote_ip_prefix: { get_param: cluster3_host_cider } }
+
+  postgresql_cluster_multi_2_c6_cluster_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: postgresql_cluster_multi_2_c6_cluster_security_group
+      rules:
+        # for cluster
+        - { direction: ingress, port_range_max: 5432, port_range_min: 5432, protocol: tcp, remote_ip_prefix: { get_param: cluster1_host_cider } }
+        - { direction: egress,  port_range_max: 5432, port_range_min: 5432, protocol: tcp, remote_ip_prefix: { get_param: cluster1_host_cider } }
+        - { direction: ingress, port_range_max: 5432, port_range_min: 5432, protocol: tcp, remote_ip_prefix: { get_param: cluster3_host_cider } }
+        - { direction: egress,  port_range_max: 5432, port_range_min: 5432, protocol: tcp, remote_ip_prefix: { get_param: cluster3_host_cider } }
+
+  postgresql_cluster_multi_3_c6_cluster_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: postgresql_cluster_multi_3_c6_cluster_security_group
+      rules:
+        # for cluster
+        - { direction: ingress, port_range_max: 5432, port_range_min: 5432, protocol: tcp, remote_ip_prefix: { get_param: cluster1_host_cider } }
+        - { direction: egress,  port_range_max: 5432, port_range_min: 5432, protocol: tcp, remote_ip_prefix: { get_param: cluster1_host_cider } }
+        - { direction: ingress, port_range_max: 5432, port_range_min: 5432, protocol: tcp, remote_ip_prefix: { get_param: cluster2_host_cider } }
+        - { direction: egress,  port_range_max: 5432, port_range_min: 5432, protocol: tcp, remote_ip_prefix: { get_param: cluster2_host_cider } }
+
+outputs:
+  postgresql_cluster_multi_1_c6_IP:
+    value:
+      str_replace:
+        template: http://$ADDRESS/
+        params:
+          $ADDRESS: { get_attr: [ postgresql_cluster_multi_1_c6_port, fixed_ips, 0, ip_address ] }
+    description: postgresql_cluster_multi_1_c6 IP Address
+
+  postgresql_cluster_multi_2_c6_IP:
+    value:
+      str_replace:
+        template: http://$ADDRESS/
+        params:
+          $ADDRESS: { get_attr: [ postgresql_cluster_multi_2_c6_port, fixed_ips, 0, ip_address ] }
+    description: postgresql_cluster_multi_2_c6 IP Address
+
+  postgresql_cluster_multi_3_c6_IP:
+    value:
+      str_replace:
+        template: http://$ADDRESS/
+        params:
+          $ADDRESS: { get_attr: [ postgresql_cluster_multi_3_c6_port, fixed_ips, 0, ip_address ] }
+    description: postgresql_cluster_multi_3_c6 IP Address

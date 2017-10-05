@@ -1,0 +1,294 @@
+heat_template_version: 2013-05-23
+
+description: Apache + Node.js Multi CentOS 6
+
+parameters:
+  keypair_name:
+    type: string
+    label: keypair_name for all servers
+    description: k5user keypair for all servers
+
+  availability_zone:
+    type: string
+    label: availability_zone
+    description: existing availability_zone
+
+  dns_nameservers:
+    type: comma_delimited_list
+    description: dns name servers.
+    default: ['133.162.193.9', '133.162.193.10']
+
+  network_id_apache:
+    type: string
+    label: Network ID
+    description: existing network id
+
+  subnet_id_apache:
+    type: string
+    label: Subnet ID
+    description: existing subnet id
+
+  network_id_nodejs:
+    type: string
+    label: Network ID
+    description: existing network id
+
+  subnet_id_nodejs:
+    type: string
+    label: Subnet ID
+    description: existing subnet id
+
+  remote_host_cidr:
+    type: string
+    label: Host CIDR
+    description: existing remote Host CIDR
+    default: 0.0.0.0/0
+
+  apache_host_cidr:
+    type: string
+    label: Host CIDR
+    description: existing remote Host CIDR
+    default: 0.0.0.0/0
+
+  nodejs_host_cidr:
+    type: string
+    label: Host CIDR
+    description: existing remote Host CIDR
+    default: 0.0.0.0/0
+
+  flavor:
+    type: string
+    label: Flavor
+    default: S-1
+
+resources:
+  apaceh_multi_c6:
+    type: OS::Nova::Server
+    properties:
+      name: apaceh_multi_c6
+      key_name: { get_param: keypair_name }
+      availability_zone: { get_param: availability_zone }
+      block_device_mapping:
+      - device_name: vda
+        volume_id: {get_resource: apaceh_multi_c6_systemvolume }
+      flavor: { get_param: flavor }
+      networks: [{"port": { get_resource: apaceh_multi_c6_port }}]
+      scheduler_hints: {"group": { get_resource: apache_nodeja_multi_c6_server_group }}
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #cloud-config
+            write_files:
+            - path: /root/install.sh
+              permissions: '0755'
+              owner: root:root
+              content: |
+                #!/bin/bash
+                echo -e '----Start installing VM----\n\n'
+
+                echo -e '--Update system--\n'
+                yum -y update
+
+                echo -e '--Install wget and httpd--\n'
+                yum -y install wget
+                yum -y install httpd
+
+                echo -e '--Modify /etc/httpd/conf/httpd.conf--\n'
+                sed -i '/^#ServerName www\.example\.com:80$/a ServerName *:80' /etc/httpd/conf/httpd.conf
+                sed -i '/^#NameVirtualHost \*:80$/a NameVirtualHost *:80'  /etc/httpd/conf/httpd.conf
+                cat >> /etc/httpd/conf/httpd.conf << 'EOS'
+                <VirtualHost *:80>
+                    ProxyPreserveHost On
+                    ServerName localhost
+                    ProxyPass / http://$nodeja_multi_c6_IPADDR:3000/
+                    ProxyPassReverse / http://$nodeja_multi_c6_IPADDR:3000/
+                </VirtualHost>
+                EOS
+
+                echo -e '--Set SELinux boolean httpd_can_network_connect to on--\n'
+                setsebool -P httpd_can_network_connect 1
+
+                service httpd start
+                chkconfig httpd on
+
+            runcmd:
+              - cat /root/install.sh > /var/log/install.log
+              - echo -e "\n-- installer log --\n" >> /var/log/install.log
+              - /root/install.sh >> /var/log/install.log
+
+          params:
+            $nodeja_multi_c6_IPADDR: { get_attr: [ nodeja_multi_c6_port , fixed_ips, 0, ip_address ] }
+
+  apaceh_multi_c6_port:
+    type: OS::Neutron::Port
+    properties:
+      name: apaceh_multi_c6_port
+      network_id: { get_param: network_id_apache }
+      availability_zone: { get_param: availability_zone }
+      security_groups:
+        - {get_resource: apaceh_multi_c6_security_group }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id_apache }
+
+  apaceh_multi_c6_systemvolume:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      description:
+      image: CentOS 6.5 64bit (English) 05
+      name: apaceh_multi_c6_systemvolume
+      size: 30
+      volume_type: M1
+
+  apaceh_multi_c6_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: apaceh_multi_c6_security_group
+      rules:
+        # ICMP
+        - { direction: ingress, ethertype: IPv4, protocol: icmp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # SSH
+        - { direction: ingress, ethertype: IPv4, port_range_min: 22, port_range_max: 22, protocol: tcp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # HTTP
+        - { direction: egress, ethertype: IPv4, port_range_min: 80, port_range_max: 80, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # HTTPS
+        - { direction: egress, ethertype: IPv4, port_range_min: 443, port_range_max: 443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # DNS
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        # metadata
+        - { direction: egress, port_range_max: 80, port_range_min: 80, protocol: tcp, remote_ip_prefix: 169.254.169.254/32 }
+        # AJP-TOMCAT
+        - { direction: egress,  ethertype: IPv4, port_range_min: 3000, port_range_max: 3000, protocol: tcp, remote_ip_prefix: { get_param: nodejs_host_cidr } }
+
+
+  nodeja_multi_c6:
+    type: OS::Nova::Server
+    properties:
+      name: nodeja_multi_c6
+      key_name: { get_param: keypair_name }
+      availability_zone: { get_param: availability_zone }
+      block_device_mapping:
+      - device_name: vda
+        volume_id: {get_resource: nodeja_multi_c6_systemvolume }
+      flavor: { get_param: flavor }
+      networks: [{"port": { get_resource: nodeja_multi_c6_port }}]
+      scheduler_hints: {"group": { get_resource: apache_nodeja_multi_c6_server_group }}
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #cloud-config
+            write_files:
+            - path: /root/install.sh
+              permissions: '0755'
+              owner: root:root
+              content: |
+                #!/bin/bash
+                echo -e '----Start installing VM----\n\n'
+
+                echo -e '--Update system--\n'
+                yum -y update
+
+                echo -e '--Install node.js--\n'
+                curl --silent --location https://rpm.nodesource.com/setup_4.x | bash -
+                yum -y install nodejs
+
+                echo -e '--Create node.js http server--\n'
+                cat >> /usr/etc/node-http.js << 'EOS'
+                var http = require('http');
+
+                http.createServer(function (req, res) {
+
+                    res.writeHead(200, {'Content-Type': 'text/plain'});
+                    res.write('Hello Apache + Node.js Multi World!!');
+                    res.end();
+
+                }).listen(3000);
+                EOS
+                #//}).listen(3000, '127.0.0.1');
+
+                echo -e '--Set SELinux boolean httpd_can_network_connect to on--\n'
+                setsebool -P httpd_can_network_connect 1
+
+                echo -e '--Service start httpd and node.js--\n'
+                node /usr/etc/node-http.js &
+
+            runcmd:
+              - cat /root/install.sh > /var/log/install.log
+              - echo -e "\n-- installer log --\n" >> /var/log/install.log
+              - /root/install.sh >> /var/log/install.log
+
+          params:
+            $nodeja_multi_c6_IPADDR: { get_attr: [ nodeja_multi_c6_port , fixed_ips, 0, ip_address ] }
+
+  nodeja_multi_c6_port:
+    type: OS::Neutron::Port
+    properties:
+      name: nodeja_multi_c6_port
+      network_id: { get_param: network_id_nodejs }
+      availability_zone: { get_param: availability_zone }
+      security_groups:
+        - {get_resource: nodeja_multi_c6_security_group }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id_nodejs }
+
+  nodeja_multi_c6_systemvolume:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      description:
+      image: CentOS 6.5 64bit (English) 05
+      name: nodeja_multi_c6_systemvolume
+      size: 30
+      volume_type: M1
+
+  nodeja_multi_c6_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: nodeja_multi_c6_security_group
+      rules:
+        # ICMP
+        - { direction: ingress, ethertype: IPv4, protocol: icmp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # SSH
+        - { direction: ingress, ethertype: IPv4, port_range_min: 22, port_range_max: 22, protocol: tcp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # HTTP
+        - { direction: egress, ethertype: IPv4, port_range_min: 80, port_range_max: 80, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # HTTPS
+        - { direction: egress, ethertype: IPv4, port_range_min: 443, port_range_max: 443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # DNS
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        # metadata
+        - { direction: egress, port_range_max: 80, port_range_min: 80, protocol: tcp, remote_ip_prefix: 169.254.169.254/32 }
+        # AJP-APACHE
+        - { direction: ingress, ethertype: IPv4, port_range_min: 3000, port_range_max: 3000, protocol: tcp, remote_ip_prefix: { get_param: apache_host_cidr } }
+
+  apache_nodeja_multi_c6_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      name: apache_nodeja_multi_c6_server_group
+      availability_zone: { get_param: availability_zone }
+      policies: [anti-affinity]
+
+outputs:
+  apaceh_multi_c6_IP:
+    value:
+      str_replace:
+        template: http://$ADDRESS/
+        params:
+          $ADDRESS: { get_attr: [ apaceh_multi_c6_port, fixed_ips, 0, ip_address ] }
+    description: apaceh_multi_c6 IP Address
+
+  nodeja_multi_c6_IP:
+    value:
+      str_replace:
+        template: http://$ADDRESS/
+        params:
+          $ADDRESS: { get_attr: [ nodeja_multi_c6_port, fixed_ips, 0, ip_address ] }
+    description: nodeja_multi_c6 IP Address

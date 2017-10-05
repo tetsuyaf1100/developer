@@ -1,0 +1,242 @@
+heat_template_version: 2013-05-23
+
+description: MatterMost ( Nginx + MySQL ) Single CentOS 6
+
+parameters:
+  keypair_name:
+    type: string
+    label: keypair_name for all servers
+    description: k5user keypair for all servers
+
+  availability_zone:
+    type: string
+    label: availability_zone
+    description: existing availability_zone
+
+  dns_nameservers:
+    type: comma_delimited_list
+    description: dns name servers.
+    default: ['133.162.193.9', '133.162.193.10']
+
+  network_id:
+    type: string
+    label: Network ID
+    description: existing network id
+
+  subnet_id:
+    type: string
+    label: Subnet ID
+    description: existing subnet id
+
+  remote_host_cidr:
+    type: string
+    label: Host CIDR
+    description: existing remote Host CIDR
+    default: 0.0.0.0/0
+
+  flavor:
+    type: string
+    label: Flavor
+    default: S-1
+
+resources:
+  mattermost_single_c6:
+    type: OS::Nova::Server
+    properties:
+      name: mattermost_single_c6
+      key_name: { get_param: keypair_name }
+      availability_zone: { get_param: availability_zone }
+      block_device_mapping:
+      - device_name: vda
+        volume_id: {get_resource: mattermost_single_c6_systemvolume }
+      flavor: { get_param: flavor }
+      networks: [{"port": { get_resource: mattermost_single_c6_port }}]
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #cloud-config
+            write_files:
+            - path: /root/install.sh
+              permissions: '0755'
+              owner: root:root
+              content: |
+                #!/bin/bash
+                echo -e '----Start installing VM----\n\n'
+
+                yum -y update
+
+                echo -e '--Install MySQL Repository--\n'
+                yum -y install http://dev.mysql.com/get/mysql57-community-release-el6-8.noarch.rpm
+
+                echo -e '--Install MySQL client, server and more--\n'
+                yum -y install mysql mysql-devel mysql-server mysql-utilities
+
+                echo -e '\n--Service start MySQL--'
+                service mysqld start
+                chkconfig mysqld on
+
+                MYSQL_TEMPORAY_PASSWORD=$(grep 'password is generated' /var/log/mysqld.log | awk -F'root@localhost: ' '{print $2}')
+                cat > /root/mysql_temporary_config.conf << EOS
+                [client]
+                user=root
+                password=$MYSQL_TEMPORAY_PASSWORD
+                connect-expired-password
+                EOS
+                MYSQL_TRUE_PASSWORD='PassWord1#'
+                service mysqld restart
+                sleep 10s
+                mysql --defaults-file=/root/mysql_temporary_config.conf -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_TRUE_PASSWORD';"
+                rm -f /root/mysql_temporary_config.conf
+                unset MYSQL_TEMPORAY_PASSWORD
+                unset MYSQL_TRUE_PASSWORD
+
+                echo -e '--Create MatterMost DB on MySQL--\n'
+                MYSQL_PWD="PassWord1#" mysql -uroot -e "CREATE DATABASE mattermost;"
+                MYSQL_PWD="PassWord1#" mysql -uroot -e "GRANT ALL PRIVILEGES ON mattermost.* TO 'mmuser'@'localhost' IDENTIFIED BY 'mmuser_Password1' WITH GRANT OPTION;"
+
+                echo -e '--Download & Install MatterMost 3.3.0--\n'
+                cd /tmp/
+                wget https://releases.mattermost.com/3.3.0/mattermost-team-3.3.0-linux-amd64.tar.gz
+                tar -xzf  mattermost-team-3.3.0-linux-amd64.tar.gz
+                mv mattermost /opt
+                mkdir -p /opt/mattermost/data
+                useradd -r mattermost -U
+                chown -R mattermost:mattermost /opt/mattermost
+                chmod -R g+w /opt/mattermost
+                sed -i 's|        "DataSource": "mmuser:mostest@tcp(dockerhost:3306)/mattermost_test?charset=utf8mb4,utf8",|        "DataSource": "mmuser:mmuser_Password1@tcp(localhost:3306)/mattermost?charset=utf8mb4,utf8",|' /opt/mattermost/config/config.json
+
+                echo -e '--Create /etc/init.d/mattermost--\n'
+                cat > /etc/init.d/mattermost << 'EOS'
+                #!/bin/sh
+                # chkconfig:   - 85 15
+                # description:  mattermost
+
+                SERVICE=mattermost
+                start() {
+                    cd /opt/mattermost/bin
+                    sudo -u mattermost ./platform > /dev/null &
+                    echo "service $SERVICE [start]"
+                }
+                stop() {
+                    pkill platform
+                    echo "service $SERVICE [stop]"
+                }
+                status() {
+                   PID=$(pgrep platform | wc -l)
+                   if [ $PID -eq 0 ]; then
+                       echo "$SERVICE stop"
+                   else
+                       echo "running $SERVICE ..."
+                   fi
+                }
+
+                case $1 in
+                start)
+                       start
+                       ;;
+                stop)
+                       stop
+                       ;;
+                status)
+                       status
+                       ;;
+                restart)
+                       stop
+                       start
+                       ;;
+                *)
+                       echo "Usage: $SERVICE [start|stop|restart|status]"
+                       ;;
+                esac
+                exit 0
+                EOS
+                chmod 755 /etc/init.d/mattermost
+
+                echo -e '--Install Nginx 1.10.1--\n'
+                rpm -ivh http://nginx.org/packages/centos/6/noarch/RPMS/nginx-release-centos-6-0.el6.ngx.noarch.rpm
+                yum -y install nginx
+                cat > /etc/nginx/conf.d/default.conf << 'EOS'
+                server {
+                  server_name  localhost;
+
+                  location / {
+                     client_max_body_size 50M;
+                     proxy_set_header Upgrade $http_upgrade;
+                     proxy_set_header Connection "upgrade";
+                     proxy_set_header Host $http_host;
+                     proxy_set_header X-Real-IP $remote_addr;
+                     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                     proxy_set_header X-Forwarded-Proto $scheme;
+                     proxy_set_header X-Frame-Options SAMEORIGIN;
+                     proxy_pass http://$mattermost_single_c6_IPADDR:8065;
+                  }
+                }
+                EOS
+
+                setsebool -P httpd_can_network_connect on
+
+                service mattermost start
+                chkconfig mattermost on
+                service nginx start
+                chkconfig nginx on
+
+            runcmd:
+              - cat /root/install.sh > /var/log/install.log
+              - echo -e "\n-- installer log --\n" >> /var/log/install.log
+              - /root/install.sh >> /var/log/install.log
+
+          params:
+            $mattermost_single_c6_IPADDR: { get_attr: [ mattermost_single_c6_port , fixed_ips, 0, ip_address ] }
+
+  mattermost_single_c6_port:
+    type: OS::Neutron::Port
+    properties:
+      name: mattermost_single_c6_port
+      network_id: { get_param: network_id }
+      availability_zone: { get_param: availability_zone }
+      security_groups:
+        - {get_resource: mattermost_single_c6_security_group }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id }
+
+  mattermost_single_c6_systemvolume:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      description:
+      image: CentOS 6.5 64bit (English) 05
+      name: mattermost_single_c6_systemvolume
+      size: 30
+      volume_type: M1
+
+  mattermost_single_c6_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: mattermost_single_c6_security_group
+      rules:
+        # ICMP
+        - { direction: ingress, ethertype: IPv4, protocol: icmp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # SSH
+        - { direction: ingress, ethertype: IPv4, port_range_min: 22, port_range_max: 22, protocol: tcp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # HTTP
+        - { direction: egress, ethertype: IPv4, port_range_min: 80, port_range_max: 80, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # HTTPS
+        - { direction: egress, ethertype: IPv4, port_range_min: 443, port_range_max: 443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # DNS
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        # metadata
+        - { direction: egress, port_range_max: 80, port_range_min: 80, protocol: tcp, remote_ip_prefix: 169.254.169.254/32 }
+
+
+outputs:
+  mattermost_single_c6_IP:
+    value:
+      str_replace:
+        template: http://$ADDRESS/
+        params:
+          $ADDRESS: { get_attr: [ mattermost_single_c6_port, fixed_ips, 0, ip_address ] }
+    description: mattermost_single_c6 IP Address

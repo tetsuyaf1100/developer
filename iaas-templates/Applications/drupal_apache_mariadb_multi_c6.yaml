@@ -1,0 +1,327 @@
+heat_template_version: 2013-05-23
+
+description: Drupal + Apache and MariaDB Multi CentOS 6
+
+parameters:
+  keypair_name:
+    type: string
+    label: keypair_name for all servers
+    description: k5user keypair for all servers
+
+  availability_zone:
+    type: string
+    label: availability_zone
+    description: existing availability_zone
+
+  dns_nameservers:
+    type: comma_delimited_list
+    description: dns name servers.
+    default: ['133.162.193.9', '133.162.193.10']
+
+  network_id_drupal_apache:
+    type: string
+    label: Network ID
+    description: existing network id
+
+  subnet_id_drupal_apache:
+    type: string
+    label: Subnet ID
+    description: existing subnet id
+
+  network_id_mariadb:
+    type: string
+    label: Network ID for DB
+    description: existing network id
+
+  subnet_id_mariadb:
+    type: string
+    label: Subnet ID for DB
+    description: existing subnet id
+
+  remote_host_cidr:
+    type: string
+    label: Host CIDR
+    description: existing remote Host CIDR
+    default: 0.0.0.0/0
+
+  flavor:
+    type: string
+    label: Flavor
+    default: S-1
+
+resources:
+  mariadb_multi_c6:
+    type: OS::Nova::Server
+    properties:
+      name: mariadb_multi_c6
+      key_name: { get_param: keypair_name }
+      availability_zone: { get_param: availability_zone }
+      block_device_mapping:
+      - device_name: vda
+        volume_id: {get_resource: mariadb_multi_c6_systemvolume}
+      flavor: { get_param: flavor }
+      networks: [{"port": { get_resource: mariadb_multi_c6_port }}]
+      scheduler_hints: {"group": { get_resource: drupal_apache_mariadb_multi_c6_server_group }}
+      user_data_format: RAW
+      user_data: |
+        #cloud-config
+        write_files:
+        - path: /root/install.sh
+          permissions: '0755'
+          owner: root:root
+          content: |
+            #!/bin/bash
+            echo -e '----Start installing DB VM----\n\n'
+            yum -y update
+
+            echo -e '--Install MariaDB 10.1--\n'
+            cat >> /etc/yum.repos.d/MariaDB.repo << 'EOS'
+            [mariadb]
+            name = MariaDB
+            baseurl = http://yum.mariadb.org/10.1/centos6-amd64
+            gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+            gpgcheck=1
+            EOS
+
+            yum -y install MariaDB-server MariaDB-devel MariaDB-common
+            cat >> /etc/my.cnf << 'EOS'
+
+            [mysqld]
+            character-set-server=utf8
+            [client]
+            default-character-set=utf8
+            EOS
+
+            #sed -i 's|^pdo_mysql\.default_socket=$|pdo_mysql.default_socket = /var/lib/mysql/mysql.sock|' /etc/php.ini
+            #sed -i 's|^mysqli\.default_socket =$|mysqli.default_socket = /var/lib/mysql/mysql.sock|' /etc/php.ini
+            #echo 'mysql.default_socket = /var/lib/mysql/mysql.sock' >> /etc/php.ini
+            service mysql start
+            mysql -h localhost -u root -e "GRANT ALL PRIVILEGES ON *.* TO root@localhost IDENTIFIED BY 'drupal8_password';"
+            mysql -h localhost -u root -pdrupal8_password -e "CREATE DATABASE d8;"
+            mysql -h localhost -u root -pdrupal8_password -e "GRANT ALL PRIVILEGES ON d8.* TO 'drupal8'@'localhost' IDENTIFIED BY 'drupal8_password';"
+            mysql -h localhost -u root -pdrupal8_password -e "GRANT ALL PRIVILEGES ON d8.* TO drupal8@\"%\" IDENTIFIED BY 'drupal8_password';"
+            mysql -h localhost -u root -pdrupal8_password -e "GRANT ALL PRIVILEGES ON d8.* TO drupal8@localhost IDENTIFIED BY 'drupal8_password';"
+            mysql -h localhost -u root -pdrupal8_password -e "GRANT ALL PRIVILEGES ON *.* TO root@\"%\" IDENTIFIED BY 'drupal8_password';"
+            mysql -h localhost -u root -pdrupal8_password -e "DELETE FROM mysql.user WHERE User=''; DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1', '%'); DROP DATABASE test; DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%'; FLUSH PRIVILEGES;"
+
+            setsebool -P httpd_can_network_connect on
+
+            echo -e '--Start services--\n'
+            service mysql restart
+            chkconfig mysql on
+
+        runcmd:
+          - cat /root/install.sh > /var/log/install.log
+          - echo -e "\n-- installer log --\n" >> /var/log/install.log
+          - /root/install.sh 1>> /var/log/install.log 2>&1
+
+  mariadb_multi_c6_port:
+    type: OS::Neutron::Port
+    properties:
+      name: mariadb_multi_c6_port
+      network_id: { get_param: network_id_mariadb }
+      availability_zone: { get_param: availability_zone }
+      security_groups:
+        - {get_resource: mariadb_multi_c6_security_group }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id_mariadb }
+
+  mariadb_multi_c6_systemvolume:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      description:
+      image: CentOS 6.5 64bit (English) 05
+      name: mariadb_multi_c6_systemvolume
+      size: 30
+      volume_type: M1
+
+  mariadb_multi_c6_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: mariadb_multi_c6_security_group
+      rules:
+        # ICMP
+        - { direction: ingress, ethertype: IPv4, protocol: icmp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # SSH
+        - { direction: ingress, ethertype: IPv4, port_range_min: 22, port_range_max: 22, protocol: tcp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # HTTP
+        - { direction: egress, ethertype: IPv4, port_range_min: 80, port_range_max: 80, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # HTTPS
+        - { direction: egress, ethertype: IPv4, port_range_min: 443, port_range_max: 443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # DNS
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        # metadata
+        - { direction: egress, port_range_max: 80, port_range_min: 80, protocol: tcp, remote_ip_prefix: 169.254.169.254/32 }
+
+        - { direction: ingress, ethertype: IPv4, port_range_min: 3306, port_range_max: 3306, protocol: tcp, remote_ip_prefix: 172.20.1.0/24 }
+        - { direction: ingress, ethertype: IPv4, port_range_min: 3306, port_range_max: 3306, protocol: tcp, remote_ip_prefix: 172.20.2.0/24 }
+
+  drupal_apache_multi_c6:
+    type: OS::Nova::Server
+    properties:
+      name: drupal_apache_multi_c6
+      key_name: { get_param: keypair_name }
+      availability_zone: { get_param: availability_zone }
+      block_device_mapping:
+      - device_name: vda
+        volume_id: {get_resource: drupal_apache_multi_c6_systemvolume }
+      flavor: { get_param: flavor }
+      networks: [{"port": { get_resource: drupal_apache_multi_c6_port }}]
+      scheduler_hints: {"group": { get_resource: drupal_apache_mariadb_multi_c6_server_group }}
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #cloud-config
+            write_files:
+            - path: /root/install.sh
+              permissions: '0755'
+              owner: root:root
+              content: |
+                #!/bin/bash
+                echo -e '----Start installing VM----\n\n'
+                yum -y update
+                yum -y install wget
+                yum -y install nc
+
+                echo -e '--Install PHP 7.0.1--\n'
+                yum -y install epel-release
+                rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+                yum -y install --enablerepo=remi,remi-php70 php php-devel php-mbstring php-pdo php-mcrypt php-mysqlnd php-pecl-xdebug php-gd php-fpm php-opcache php-xml
+                sed -i 's|^listen = 127\.0\.0\.1:9000$|listen = /var/run/php-fpm/php-fpm.sock|' /etc/php-fpm.d/www.conf
+                sed -i 's|^;listen\.owner = nobody|listen.owner = apache|' /etc/php-fpm.d/www.conf
+                sed -i 's|^;listen\.group = nobody|listen.group = apache|' /etc/php-fpm.d/www.conf
+
+                echo -e '--Wait to make DB server--\n'
+                i=0
+                until nc -z $mariadb_multi_c6_port_IPADDR 3306
+                do
+                    if [ $i -gt 500 ]; then
+                      break
+                    fi
+                    sleep 5
+                    i=$(($i+1))
+                done
+                sleep 10
+
+                echo -e '--Install MariaDB 10.1--\n'
+                cat >> /etc/yum.repos.d/MariaDB.repo << 'EOS'
+                # MariaDB 10.1 CentOS repository list - created 2016-05-09 23:50 UTC
+                # http://mariadb.org/mariadb/repositories/
+                [mariadb]
+                name = MariaDB
+                baseurl = http://yum.mariadb.org/10.1/centos6-amd64
+                gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+                gpgcheck=1
+
+                EOS
+                yum -y install MariaDB-client
+
+                echo -e '--Install Apache--\n'
+                yum -y install httpd
+                sed -i '/^#ServerName www\.example\.com:80$/a ServerName *:80' /etc/httpd/conf/httpd.conf
+                sed -i 's|AllowOverride None|AllowOverride All|g' /etc/httpd/conf/httpd.conf
+                sed -i 's|^DocumentRoot "/var/www/html"|DocumentRoot "/var/www/html/drupal"|' /etc/httpd/conf/httpd.conf
+
+                echo -e '--Install Drupal 8.1.8--\n'
+                cd /var/www/html/
+                wget https://ftp.drupal.org/files/projects/drupal-8.1.8.tar.gz
+                tar -xzf drupal-8.1.8.tar.gz
+                mkdir -p /var/www/html/drupal-8.1.8/sites/default/files/translations
+                wget https://ftp.drupal.org/files/translations/8.x/drupal/drupal-8.1.8.ja.po
+                mv drupal-8.1.8.ja.po /var/www/html/drupal-8.1.8/sites/default/files/translations
+                chmod ug+w /var/www/html/drupal-8.1.8/
+                cp /var/www/html/drupal-8.1.8/sites/default/default.settings.php /var/www/html/drupal-8.1.8/sites/default/settings.php
+                cp /var/www/html/drupal-8.1.8/sites/default/default.services.yml /var/www/html/drupal-8.1.8/sites/default/services.yml
+                chmod ug+w /var/www/html/drupal-8.1.8/sites/default/settings.php
+                chmod ug+w /var/www/html/drupal-8.1.8/sites/default/services.yml
+                find /var/www/html/drupal-8.1.8/sites/ -type d -exec chmod ug+w {} +
+                ln -s drupal-8.1.8 drupal
+                chown -R apache:apache drupal-8.1.8 drupal
+                chcon -R -t httpd_sys_content_rw_t /var/www/html/drupal/sites/
+
+                setsebool -P httpd_can_network_connect on
+
+                service httpd restart
+                chkconfig httpd on
+
+            runcmd:
+              - cat /root/install.sh > /var/log/install.log
+              - echo -e "\n-- installer log --\n" >> /var/log/install.log
+              - /root/install.sh 1>> /var/log/install.log 2>&1
+
+          params:
+            $drupal_apache_multi_c6_IPADDR: { get_attr: [ drupal_apache_multi_c6_port , fixed_ips, 0, ip_address ] }
+            $mariadb_multi_c6_port_IPADDR: { get_attr: [ mariadb_multi_c6_port , fixed_ips, 0, ip_address ] }
+
+  drupal_apache_multi_c6_port:
+    type: OS::Neutron::Port
+    properties:
+      name: drupal_apache_multi_c6_port
+      network_id: { get_param: network_id_drupal_apache }
+      availability_zone: { get_param: availability_zone }
+      security_groups:
+        - {get_resource: drupal_apache_multi_c6_security_group }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id_drupal_apache }
+
+  drupal_apache_multi_c6_systemvolume:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      description:
+      image: CentOS 6.5 64bit (English) 05
+      name: drupal_apache_multi_c6_systemvolume
+      size: 30
+      volume_type: M1
+
+  drupal_apache_multi_c6_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: drupal_apache_multi_c6_security_group
+      rules:
+        # ICMP
+        - { direction: ingress, ethertype: IPv4, protocol: icmp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # SSH
+        - { direction: ingress, ethertype: IPv4, port_range_min: 22, port_range_max: 22, protocol: tcp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # HTTP
+        - { direction: egress, ethertype: IPv4, port_range_min: 80, port_range_max: 80, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # HTTPS
+        - { direction: egress, ethertype: IPv4, port_range_min: 443, port_range_max: 443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # DNS
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        # metadata
+        - { direction: egress, port_range_max: 80, port_range_min: 80, protocol: tcp, remote_ip_prefix: 169.254.169.254/32 }
+
+        - { direction: egress, ethertype: IPv4, port_range_min: 3306, port_range_max: 3306, protocol: tcp, remote_ip_prefix: 172.20.2.0/24 }
+
+  drupal_apache_mariadb_multi_c6_server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      name: drupal_apache_mariadb_multi_c6_server_group
+      availability_zone: { get_param: availability_zone }
+      policies: [anti-affinity]
+
+outputs:
+  drupal_apache_multi_c6_URL:
+    description: drupal_apache_multi_c6 URL
+    value:
+      str_replace:
+        template: http://$ADDRESS/
+        params:
+          $ADDRESS: { get_attr: [ drupal_apache_multi_c6_port, fixed_ips, 0, ip_address ] }
+
+  mariadb_multi_c6_URL:
+    value:
+      str_replace:
+        template: http://$ADDRESS/
+        params:
+          $ADDRESS: { get_attr: [ mariadb_multi_c6_port, fixed_ips, 0, ip_address ] }
+    description: mariadb_multi_c6 URL

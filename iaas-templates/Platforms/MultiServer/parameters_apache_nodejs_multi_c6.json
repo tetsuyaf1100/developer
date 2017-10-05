@@ -1,0 +1,8 @@
+    "parameters": {
+        "keypair_name": "ci-env",
+        "availability_zone": "jp-east-1a",
+        "network_id_apache": "6dd2a528-503b-4bee-9117-500d79e5550e",
+        "subnet_id_apache": "21e55f8e-c2b4-4520-a346-e9d6af155073",
+        "network_id_nodejs": "6dd2a528-503b-4bee-9117-500d79e5550e",
+        "subnet_id_nodejs": "21e55f8e-c2b4-4520-a346-e9d6af155073"
+    }

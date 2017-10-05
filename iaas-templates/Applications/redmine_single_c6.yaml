@@ -1,0 +1,233 @@
+heat_template_version: 2013-05-23
+
+description: Redmine Single CentOS 6
+
+parameters:
+  keypair_name:
+    type: string
+    label: keypair_name for all servers
+    description: k5user keypair for all servers
+
+  availability_zone:
+    type: string
+    label: availability_zone
+    description: existing availability_zone
+
+  dns_nameservers:
+    type: comma_delimited_list
+    description: dns name servers.
+    default: ['133.162.193.9', '133.162.193.10']
+
+  network_id:
+    type: string
+    label: Network ID
+    description: existing network id
+
+  subnet_id:
+    type: string
+    label: Subnet ID
+    description: existing subnet id
+
+  remote_host_cidr:
+    type: string
+    label: Host CIDR
+    description: existing remote Host CIDR
+    default: 0.0.0.0/0
+
+  flavor:
+    type: string
+    label: Flavor
+    default: S-1
+
+resources:
+  redmine_single_c6:
+    type: OS::Nova::Server
+    properties:
+      name: redmine_single_c6
+      key_name: { get_param: keypair_name }
+      availability_zone: { get_param: availability_zone }
+      block_device_mapping:
+      - device_name: vda
+        volume_id: {get_resource: redmine_single_c6_systemvolume }
+      flavor: { get_param: flavor }
+      networks: [{"port": { get_resource: redmine_single_c6_port }}]
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #cloud-config
+            write_files:
+            - path: /root/install.sh
+              permissions: '0755'
+              owner: root:root
+              content: |
+                #!/bin/bash
+                echo -e '----Start installing VM----\n\n'
+                setenforce 0
+
+                sleep 5m
+
+                echo -e "--Preparing Installation Redmine devels httpd postgresql ImageMagick--\n"
+                yum -y groupinstall "Development Tools"
+                yum -y install openssl-devel readline-devel zlib-devel curl-devel libyaml-devel libffi-devel
+                yum -y install postgresql-server postgresql-devel
+                yum -y install httpd httpd-devel
+                yum -y install ImageMagick ImageMagick-devel ipa-pgothic-fonts
+
+                echo -e "--Install Ruby2.2.3--\n"
+                cd /tmp
+                curl -O https://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.2.3.tar.gz
+                tar xvf ruby-2.2.3.tar.gz
+                cd ruby-2.2.3
+                ./configure --disable-install-doc
+                make
+                make install
+                cd ..
+                ruby -v
+
+                echo -e "--Install bundle--\n"
+                gem install bundler --no-rdoc --no-ri
+
+                echo -e "--Initialize DB--\n"
+                service postgresql initdb
+
+                echo -e "--Modify /var/lib/pgsql/data/pg_hba.conf--\n"
+                sed -i 's| peer$|trust|' /var/lib/pgsql/data/pg_hba.conf
+                sed -i 's|ident$|trust|' /var/lib/pgsql/data/pg_hba.conf
+                cat >> var/lib/pgsql/data/pg_hba.conf << 'EOS'
+                host    redmine         redmine         127.0.0.1/32            trust
+                host    redmine         redmine         ::1/128 trust
+                EOS
+
+                echo -e "--Create DB--\n"
+                runuser -l postgres -c "/usr/pgsql-9.5/bin/psql -c \"CREATE ROLE root WITH SUPERUSER REPLICATION CREATEDB CREATEROLE LOGIN;\""
+                runuser -l postgres -c "/usr/pgsql-9.5/bin/psql -c \"CREATE DATABASE root OWNER root;\""
+                psql -c "CREATE ROLE redmine WITH SUPERUSER REPLICATION CREATEDB CREATEROLE LOGIN PASSWORD 'redmine_password';"
+                psql -c "CREATE DATABASE redmine OWNER redmine;"
+
+                echo -e "--Start service postgresql--\n"
+                service potsgresql start
+                chkconfig potsgresql on
+
+                sleep 2m
+
+                echo -e "--Install Redmine 3.2--\n"
+                cd /var/lib/
+                svn co http://svn.redmine.org/redmine/branches/3.2-stable /var/lib/redmine
+
+                echo -e "--Create /var/lib/redmine/config/database.yml--\n"
+                cat > /var/lib/redmine/config/database.yml << 'EOS'
+                production:
+                  adapter: postgresql
+                  database: redmine
+                  host: localhost
+                  username: redmine
+                  password: "redmine_password
+                  encoding: utf8
+                EOS
+
+                echo -e "--Install bundle etc gem passenger--\n"
+                cd /var/lib/redmine
+                bundle install --without development test --path vendor/bundle
+                bundle exec rake generate_secret_token
+                RAILS_ENV=production bundle exec rake db:migrate
+                RAILS_ENV=production REDMINE_LANG=ja bundle exec rake redmine:load_default_data
+
+                sleep 2m
+
+                gem install passenger --no-rdoc --no-ri
+                passenger-install-apache2-module --auto
+
+                echo -e "--Create /etc/httpd/conf.d/redmine.conf--\n"
+                cat > /etc/httpd/conf.d/redmine.conf << 'EOS'
+                <Directory "/var/lib/redmine/public">
+                  Require all granted
+                </Directory>
+                EOS
+                passenger-install-apache2-module --snippet >> /etc/httpd/conf.d/redmine.conf
+                cat >> /etc/httpd/conf.d/redmine.conf << 'EOS'
+                Header always unset "X-Powered-By"
+                Header always unset "X-Runtime"
+                PassengerMaxPoolSize 20
+                PassengerMaxInstancesPerApp 4
+                PassengerPoolIdleTime 864000
+                PassengerHighPerformance on
+                PassengerStatThrottleRate 10
+                PassengerSpawnMethod smart
+                PassengerFriendlyErrorPages off
+                RackBaseURI /redmine
+                EOS
+                gem list
+                bundle show
+
+                sleep 2m
+
+                echo -e "--Change SELinux setting--\n"
+                setsebool -P httpd_can_network_connect 1
+
+                echo -e "--Change Redmine Owner to apache--\n"
+                chown -R apache:apache /var/lib/redmine
+                ln -s /var/lib/redmine/public /var/www/html/redmine
+
+                echo -e "--Start service httpd--\n"
+                service httpd start
+                chkconfig httpd on
+
+            runcmd:
+              - cat /root/install.sh > /var/log/install.log
+              - echo -e "\n-- installer log --\n" >> /var/log/install.log
+              - /root/install.sh >> /var/log/install.log
+
+          params:
+            $redmine_single_c6_IPADDR: { get_attr: [ redmine_single_c6_port , fixed_ips, 0, ip_address ] }
+
+  redmine_single_c6_port:
+    type: OS::Neutron::Port
+    properties:
+      name: redmine_single_c6_port
+      network_id: { get_param: network_id }
+      availability_zone: { get_param: availability_zone }
+      security_groups:
+        - {get_resource: redmine_single_c6_security_group }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id }
+
+  redmine_single_c6_systemvolume:
+    type: OS::Cinder::Volume
+    properties:
+      availability_zone: { get_param: availability_zone }
+      description:
+      image: CentOS 6.5 64bit (English) 05
+      name: redmine_single_c6_systemvolume
+      size: 30
+      volume_type: M1
+
+  redmine_single_c6_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: redmine_single_c6_security_group
+      rules:
+        # ICMP
+        - { direction: ingress, ethertype: IPv4, protocol: icmp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # SSH
+        - { direction: ingress, ethertype: IPv4, port_range_min: 22, port_range_max: 22, protocol: tcp, remote_ip_prefix: { get_param: remote_host_cidr } }
+        # HTTP
+        - { direction: egress, ethertype: IPv4, port_range_min: 80, port_range_max: 80, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # HTTPS
+        - { direction: egress, ethertype: IPv4, port_range_min: 443, port_range_max: 443, protocol: tcp, remote_ip_prefix: 0.0.0.0/0 }
+        # DNS
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: tcp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 0] } }
+        - { direction: egress, ethertype: IPv4, port_range_min: 53, port_range_max: 53, protocol: udp, remote_ip_prefix: { get_param: [dns_nameservers, 1] } }
+        # metadata
+        - { direction: egress, port_range_max: 80, port_range_min: 80, protocol: tcp, remote_ip_prefix: 169.254.169.254/32 }
+
+outputs:
+  redmine_single_c6_IP:
+    value:
+      str_replace:
+        template: http://$ADDRESS/
+        params:
+          $ADDRESS: { get_attr: [ redmine_single_c6_port, fixed_ips, 0, ip_address ] }
+    description: redmine_single_c6 IP Address
