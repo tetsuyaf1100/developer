@@ -62,43 +62,43 @@ Apache + Tomcat マルチインスタンス<br>テンプレート概要説明
 
 1. トークンとorchestrationのエンドポイントを取得します。
 1. 下記のフォーマットでパラメタファイルを用意します。<br>必要なパラメタを過不足なく指定します。<br>最後のパラメタには「,」が不要です。<br>パラメタの詳細は作成時パラメタを参照してください。
-    >```json
-    >"parameters": {
-    >    "パラメタ１名": "値",
-    >    "パラメタ２名": "値",
-    >    "パラメタ３名": "値",
-    >              ・
-    >              ・
-    >              ・
-    >    "パラメタｎ名": "値"
-    >}
-    >```
+    ```json
+    "parameters": {
+        "パラメタ１名": "値",
+        "パラメタ２名": "値",
+        "パラメタ３名": "値",
+                  ・
+                  ・
+                  ・
+        "パラメタｎ名": "値"
+    }
+    ```
 
 1. スタックネームとHeatテンプレートファイルネームを指定し下記のコマンドでスタック情報ファイルを作成します。
-    >```bash
-    >echo "{" > スタック情報ファイル
-    >echo "    \"stack_name\": \"スタックネーム\"," >> スタック情報ファイル
-    >echo -n "    \"template\":\"" >> スタック情報ファイル
-    >cat Heatテンプレートファイルネーム | \
-    >    sed -e 's/\\/\\\\/g' | \
-    >    awk -F\n -v ORS='\\n'  '{print}' | \
-    >    sed -e 's/\"/\\"/g' | \
-    >    sed -e 's/`/\\`/g' | \
-    >    sed -e 's/\r/\\r/g' | \
-    >    sed -e 's/\f/\\f/g' | \
-    >    sed -e 's/\t/\\t/g' >> スタック情報ファイル
-    >echo "\"" >> スタック情報ファイル
-    >echo "    ," >> スタック情報ファイル
-    >cat パラメタファイル >> スタック情報ファイル
-    >echo -n "}" >> スタック情報ファイル
-    >```
+    ```bash
+    echo "{" > スタック情報ファイル
+    echo "    \"stack_name\": \"スタックネーム\"," >> スタック情報ファイル
+    echo -n "    \"template\":\"" >> スタック情報ファイル
+    cat Heatテンプレートファイルネーム | \
+        sed -e 's/\\/\\\\/g' | \
+        awk -F\n -v ORS='\\n'  '{print}' | \
+        sed -e 's/\"/\\"/g' | \
+        sed -e 's/`/\\`/g' | \
+        sed -e 's/\r/\\r/g' | \
+        sed -e 's/\f/\\f/g' | \
+        sed -e 's/\t/\\t/g' >> スタック情報ファイル
+    echo "\"" >> スタック情報ファイル
+    echo "    ," >> スタック情報ファイル
+    cat パラメタファイル >> スタック情報ファイル
+    echo -n "}" >> スタック情報ファイル
+    ```
 
 1. 取得したトークン、orchestrationのエンドポイント、スタック情報ファイルを以って下記のcurlコマンドを実行しスタックを作成します。
-    >```bash
-    >curl -k -H "X-Auth-Token: トークン" -X POST \
-    >  -H "Content-Type: application/json" -H "Accept: application/json" \
-    >  orchestrationのエンドポイント/stacks -d @スタック情報ファイル --verbose
-    >```
+    ```bash
+    curl -k -H "X-Auth-Token: トークン" -X POST \
+      -H "Content-Type: application/json" -H "Accept: application/json" \
+      orchestrationのエンドポイント/stacks -d @スタック情報ファイル --verbose
+    ```
 
 <br>
 
