@@ -69,9 +69,9 @@ Aipo シングルインスタンス<br>テンプレート概要説明
     echo -n "}" >> スタック情報ファイル
     ```
 
-1. 取得したトークン、orchestrationのエンドポイント、スタック情報ファイルを以って下記のcurlコマンドを実行しスタックを作成します。
+1. 取得したトークン ($OS_AUTH_TOKEN)、orchestrationのエンドポイント、スタック情報ファイルを以って下記のcurlコマンドを実行しスタックを作成します。
     ```
-    curl -k -H "X-Auth-Token: トークン" -X POST \
+    curl -k -H "X-Auth-Token: $OS_AUTH_TOKEN" -X POST \
       -H "Content-Type: application/json" -H "Accept: application/json" \
       orchestrationのエンドポイント/stacks -d @スタック情報ファイル --verbose
     ```
