@@ -534,3 +534,5 @@ Markdown 形式で記載します。
 【参考： Hexo画面 】
 
   ![Hexoテーマの変更](./image/hexo_theme.jpg)
+
+[[第3章 GitHubEnterprise環境構築へ]](github-enterprise.md)

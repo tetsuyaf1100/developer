@@ -14,3 +14,5 @@ K5 IaaS環境構築 手順に関しましては、<br/>
 本ガイドでは仮想サーバのOSとしてCentOS7を利用します。<br/>
 K5提供OSより「CentOS 7.x (64bit) 英語版」がご利用できます。<br/>
 K5が提供しているOSに関しましては[「FUJITSU Cloud Service K5 IaaS」](http://jp.fujitsu.com/solutions/cloud/k5/function/iaas/)ページよりご確認ください。<br/>
+
+[[第2章 CIサーバ環境構築へ]](ci-server.md)

@@ -231,3 +231,5 @@ git push -u origin sample-branch
 また、同じく赤枠の[Delete branch]を押下すると「 Pull request」で使用したブランチを削除することができます。<br/>
 
 以上を踏まえて、開発チーム内で「 Pull request 」 と「 merge 」を 効果的に行ってください。
+
+[[第4章 JenkinsとGitHubの連携へ]](configuration.md)

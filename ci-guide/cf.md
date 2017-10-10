@@ -44,3 +44,5 @@ cf logs <APPLICATION_NAME> --<スペース名>
 cf logout
 
 ```
+
+[[第6章 テストツールの導入へ]](test-tools.md)
