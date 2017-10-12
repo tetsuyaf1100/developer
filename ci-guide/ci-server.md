@@ -333,7 +333,7 @@ Jenkins ではプラグインにより機能を拡張することが出来るの
 本ガイドで必要となるプラグイン<br>
 
 - [Git Plugin](https://wiki.jenkins.io/display/JENKINS/Git+Plugin)<br/>
-インストール後、「GitHubEnterprise」と連携したJenkinsのジョブが作成可能になります。<br/>
+インストール後、「GitHub Enterprise」と連携したJenkinsのジョブが作成可能になります。<br/>
 
 - [SSH Agent Plugin](https://jenkins.io/doc/pipeline/steps/ssh-agent/)<br/>
 SSH鍵認証を行えるようになります。<br/>
@@ -532,4 +532,4 @@ Markdown 形式で記載します。
 
   ![Hexoテーマの変更](./image/hexo_theme.jpg)
 
-[[第3章 GitHubEnterprise環境構築へ]](github-enterprise.md)
+[[第3章 GitHub Enterprise環境構築へ]](github-enterprise.md)

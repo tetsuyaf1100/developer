@@ -1,10 +1,10 @@
-## 第3章　GitHubEnterprise環境構築
+## 第3章　GitHub Enterprise環境構築
 
-### 3-1.GitHubEnterprise 導入手順
+### 3-1.GitHub Enterprise 導入手順
 
 FUJITSU Cloud Service K5では、分散型のバージョン管理システム Git の
 ウェブサービス[「 GitHub Enterprise 」](http://jp.fujitsu.com/solutions/cloud/k5/function/paas/github/)がご利用いただけます。<br/>
-「 GitHubEnterprise 」と Jenkins などの CI ツールと組み合わせることで自動デプロイが可能なCI環境が構築できます。<br/>
+「 GitHub Enterprise 」と Jenkins などの CI ツールと組み合わせることで自動デプロイが可能なCI環境が構築できます。<br/>
 特に複数人が参加するチーム開発において「 GitHub Enterprise 」の利用は開発資産管理のフローを簡略化し効果的な運用を実現できます。<br/>
 本ガイドでは、効率的な資産管理を実現するワークフロー「Github Flow」を意識してCI環境を構築していきます。<br/>
 
@@ -18,7 +18,7 @@ FUJITSU Cloud Service K5では、分散型のバージョン管理システム G
 
 1.リモートリポジトリの作成
 
- 「 GitHubEnterprise 」の画面で新規のリポジトリを作成します。<br/>
+ 「 GitHub Enterprise 」の画面で新規のリポジトリを作成します。<br/>
  トップ画面中央の[Start a project]を押下、または右下の [New repository]を押下します。<br/>
  ![GHE01](./image/repository_ghe.jpg)
 　<br/>
@@ -50,7 +50,7 @@ echo "# test-github" >> README.md
 # Gitリポジトリ化します。
 git init
 
-#「 GitHubEnterprise 」の画面で作成したリモートリポジトリ情報を登録します。
+#「 GitHub Enterprise 」の画面で作成したリモートリポジトリ情報を登録します。
 git remote add origin https://github.com/ユーザ名/test-github(リモートリポジトリ名)
 
 （# sshで接続する場合は）
@@ -65,7 +65,7 @@ git commit -m "[コミットのコメント記入]"
 # プッシュして ローカルリポジトリをリモートリポジトリへ反映させます。
 git push -u origin master
 
-#「 GitHubEnterprise 」に登録したユーザー名を聞かれます。
+#「 GitHub Enterprise 」に登録したユーザー名を聞かれます。
 Username for 'https://github.com': ここにユーザ名を入力
 
 # 続けて同じく登録したパスワードを入力します。
@@ -74,20 +74,20 @@ Password for 'https://ユーザ名@github.com': ここにパスワード入力
 
 ```
 
-「 GitHubEnterprise 」画面で確認
+「 GitHub Enterprise 」画面で確認
 
 `https://github.com/ユーザ名/test-github(リポジトリ名)`
 
 ![GHE04](./image/repository_push.jpg)
 　<br/>
 動作確認用に作成した「 README.md 」が格納され、画面に「 test-github 」が表示されていれば完了です。<br/>
-以上で開発資産管理の場として「 GitHubEnterprise 」の準備ができました。<br/>
+以上で開発資産管理の場として「 GitHub Enterprise 」の準備ができました。<br/>
 
 　<br>
 
 ### 3-2.PullRequestとMerge<a name="git_function"></a><br/>
 
-「 GitHubEnterprise 」による資産管理を行う上で欠かせない機能が「PullRequest」と「Merge」です。<br/>
+「 GitHub Enterprise 」による資産管理を行う上で欠かせない機能が「PullRequest」と「Merge」です。<br/>
 
 ここではチーム開発における効率的な資産管理を実現するGithubの運用モデル「 GitHub Flow 」を意識して、
 「PullRequest」と「Merge」の基本操作を説明します。<br/>
@@ -128,8 +128,8 @@ git branch
 git checkout <ブランチ名(sample-branch)>
 ```
 
-もし、プルリクエストを行うリポジトリが仮想サーバにまだ用意していなかった場合は「 GitHubEnterprise 」画面からクローンします。<br/>
-「 GitHubEnterprise 」画面からクローンするためのコードを取得します。<br/>
+もし、プルリクエストを行うリポジトリが仮想サーバにまだ用意していなかった場合は「 GitHub Enterprise 」画面からクローンします。<br/>
+「 GitHub Enterprise 」画面からクローンするためのコードを取得します。<br/>
 [ Clone or download ]を押下し表示された https をコピーします。<br/>
 以下は先程作成したリモートリポジトリ「test-github」を使用した例です。<br/>
 

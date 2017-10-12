@@ -38,15 +38,15 @@
 
 **事前準備** <br/>
 
-1．Hexo資産作成と「 GitHubEnterprise 」へ格納
+1．Hexo資産作成と「 GitHub Enterprise 」へ格納
 
-これからJenkinsの設定を行っていきますが、前提として、 Hexo の資産が「 GitHubEnterprise 」に格納されていなければなりません。<br/>
+これからJenkinsの設定を行っていきますが、前提として、 Hexo の資産が「 GitHub Enterprise 」に格納されていなければなりません。<br/>
 
 Hexo資産の作成は[「第2章 2-3. Hexo導入手順」](#hexo)で紹介した例を参考にしてください。
 
-次に作成したHexo資産を「 GitHubEnterprise 」に格納します。
+次に作成したHexo資産を「 GitHub Enterprise 」に格納します。
 
-「 GitHubEnterprise 」にHexo資産格納用のリポジトリを作成し、Hexo を導入したディレクトリをそのリモートリポジトリにします。<br/>
+「 GitHub Enterprise 」にHexo資産格納用のリポジトリを作成し、Hexo を導入したディレクトリをそのリモートリポジトリにします。<br/>
 手順は[「リポジトリ作成方法」](#repository)を参考に、以下の通りです。<br/>
 
 
@@ -54,7 +54,7 @@ Hexo資産の作成は[「第2章 2-3. Hexo導入手順」](#hexo)で紹介し�
 # Hexo を導入したディレクトリに入ります。
  cd <Hexoを導入したディレクトリ>
 
-# 「 GitHubEnterprise 」で作成した Hexo用のリポジトリをクローンします。
+# 「 GitHub Enterprise 」で作成した Hexo用のリポジトリをクローンします。
   git clone git@github.com:ユーザ名/リポジトリ名
 （または git clone https://github.com/ユーザ名/リポジトリ名 ）
 
@@ -64,8 +64,8 @@ Hexo資産の作成は[「第2章 2-3. Hexo導入手順」](#hexo)で紹介し�
 
 ```
 
-Hexo 作業用ディレクトリと「 GitHubEnterprise 」の Hexo 資産格納用のリポジトリと連携ができましたら、<br/>
-資産を「 GitHubEnterprise 」へ格納します。
+Hexo 作業用ディレクトリと「 GitHub Enterprise 」の Hexo 資産格納用のリポジトリと連携ができましたら、<br/>
+資産を「 GitHub Enterprise 」へ格納します。
 
 ```
 
@@ -80,7 +80,7 @@ git push origin master
 
 ```
 
-以上で「 Hexo 」で作成した静的ウェブページの資産が「 GitHubEnterprise 」のリポジトリに格納されます。<br/>
+以上で「 Hexo 」で作成した静的ウェブページの資産が「 GitHub Enterprise 」のリポジトリに格納されます。<br/>
 
 2．テストツールの実行コマンド<br/>
 
@@ -91,7 +91,7 @@ git push origin master
 
 　<br/>
 
-**1．資産取得（GitHubEnterpriseからWorkSpaceへ資産格納）**<br/>
+**1．資産取得（GitHub EnterpriseからWorkSpaceへ資産格納）**<br/>
 
 >開発資産を管理している「GitHub Enterprise」のリポジトリから資産を取得し、Jenkinsの作業スペースであるWorkSpaceに資産を格納します。<br/>
 >
@@ -102,7 +102,7 @@ git push origin master
 >
 >以下、設定手順
 >
-> 1. JenkinsでGitHubEnterprise資産取得用のジョブを作成します。
+> 1. JenkinsでGitHub Enterprise資産取得用のジョブを作成します。
 > 2. [ 新規ジョブ作成 ]  →  [ フリースタイル・プロジェクトのビルド ] で任意の名前のジョブを作成します。
 > 3. [ 設定 ] → [ ソースコード管理 ] タブ  →  [ Git ]を選択し、以下の項目を設定します。
 >   - リポジトリ：

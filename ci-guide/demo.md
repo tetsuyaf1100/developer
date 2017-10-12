@@ -14,7 +14,7 @@
 ![scenario01](./image/scenario01.jpg)
 　<br/>
 
-各開発チームが作業を行う前にGitHubEnterpriseのリポジトリのMasterブランチから資産を取得します。<br/>
+各開発チームが作業を行う前にGitHub EnterpriseのリポジトリのMasterブランチから資産を取得します。<br/>
 
 手順は[「第3章 3-2.PullRequest と Merge 」](#git_function)で紹介したとおりです。<br/>
 
@@ -55,7 +55,7 @@ git commit -m "開発チームＡ"
 # 作業用ブランチ「team_A」へプッシュします。
 git push -u origin team_A
 ```
-正しくPushできたかGitHubEnterpriseの画面で確認します。<br/>
+正しくPushできたかGitHub Enterpriseの画面で確認します。<br/>
 
 【リモートリポジトリ「CI_Guide」画面その１】
 ![scenario_push](./image/scenario_push.jpg)
@@ -121,7 +121,7 @@ Pipelineの結果は設定したメールにて管理者に報告されます。
 
 **シナリオ⑥ MasterブランチへMerge**<br>
 
-GitHubEnterpriseの対象リポジトリの画面からmergeを行います。<br/>
+GitHub Enterpriseの対象リポジトリの画面からmergeを行います。<br/>
 手順は第3章の[「Merge 手順」](#merge)の通りです。<br/>
 
 ![scenario_merge](./image/scenario_merge.jpg)

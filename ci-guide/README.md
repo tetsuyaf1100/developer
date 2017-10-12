@@ -71,9 +71,9 @@
 	  ・Hexo 記事の作成と HTML の生成
 	  ・その他のHexoの使い方
 
-[第3章 GitHubEnterprise環境構築](github-enterprise.md)
+[第3章 GitHub Enterprise環境構築](github-enterprise.md)
 
-	3-1.GitHubEnterprise導入手順
+	3-1.GitHub Enterprise導入手順
 	  ・リポジトリ作成方法
 	  ・リモートリポジトリの作成方法
 	  ・ローカルリポジトリの作成方法

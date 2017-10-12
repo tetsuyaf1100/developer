@@ -1,10 +1,10 @@
 ## 第4章 JenkinsとGitHub Enterpriseの連携
 
-本ガイドでは構成管理ツール 「GitHubEnterprise」とCIツール「Jenkins」を連携させることによってCI環境を構築していきます。<br/>
-「GitHubEnterprise」と「Jenkins」の連携に必要な設定として「WebHookの設定」と「SSHの設定」を行います。
-連携を行うことで「 GitHubEnterprise 」のリポジトリに行われたイベントを「Jenkins」へ通知し、そのイベントをトリガーに「Jenkins」のジョブを起動させることができます。<br/>
+本ガイドでは構成管理ツール 「GitHub Enterprise」とCIツール「Jenkins」を連携させることによってCI環境を構築していきます。<br/>
+「GitHub Enterprise」と「Jenkins」の連携に必要な設定として「WebHookの設定」と「SSHの設定」を行います。
+連携を行うことで「 GitHub Enterprise 」のリポジトリに行われたイベントを「Jenkins」へ通知し、そのイベントをトリガーに「Jenkins」のジョブを起動させることができます。<br/>
 
-以下では「GitHubEnterprise」と「Jenkins」の連携に必要な「WebHookの設定」と「SSHの設定」の手順を紹介します。<br/>
+以下では「GitHub Enterprise」と「Jenkins」の連携に必要な「WebHookの設定」と「SSHの設定」の手順を紹介します。<br/>
 
 --------------------------------------------------------------------------------------------------------------------------------
 　<br/>
@@ -147,7 +147,7 @@ Payload URL 設定
 
 ### 4-3. SSHの設定 <a name="SSH"></a><br/>
 
-JenkinsとGitHubEnterpriseを接続するために必要な設定です。<br/>
+JenkinsとGitHub Enterpriseを接続するために必要な設定です。<br/>
 ※ここでは、JenkinsにSSH接続するために必要な秘密鍵と公開鍵が作成されていることを前提としています。<br/>
 
 **■ Jenkins の設定**<br/>
@@ -190,7 +190,7 @@ JenkinsとGitHubEnterpriseを接続するために必要な設定です。<br/>
 以上の項目を設定したら、一番下の左にある"追加"を押下し、設定完了です。<br/>
 
 
-**■ GitHubEnterpriseの設定**<br/>
+**■ GitHub Enterpriseの設定**<br/>
 > GitHub側の設定については、GitHubの個人設定からSSH用の公開鍵を設定する必要があります。<br/>
 
  [ SSH keys ] の設定<br/>
