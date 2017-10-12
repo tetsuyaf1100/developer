@@ -442,9 +442,6 @@ Hexo は Node で作成されているため Node.js の導入が必要となり
  ```
   npm install hexo-cli -g
 
-# (プロキシのためエラーになる場合は config を設定して再度インストール)
-# (npm config set proxy http://プロキシサーバー:ポート番号)
-
 # Hexo の初期化。必要なファイル/フォルダが生成されます。
   hexo init [ Hexo作業用ディレクトリ名 ]
 
