@@ -14,7 +14,7 @@
 ![scenario01](./image/scenario01.jpg)
 　<br/>
 
-各開発チームが作業を行う前にGitHub EnterpriseのリポジトリのMasterブランチから資産を取得します。<br/>
+各開発チームが作業を行う前にGitHub Enterpriseのリポジトリのmasterブランチから資産を取得します。<br/>
 
 手順は[「第3章 3-2.PullRequest と Merge 」](#git_function)で紹介したとおりです。<br/>
 
@@ -119,7 +119,7 @@ Pipelineの結果は設定したメールにて管理者に報告されます。
 ![scenario04](./image/scenario04.jpg)
 　<br/>
 
-**シナリオ⑥ MasterブランチへMerge**<br>
+**シナリオ⑥ masterブランチへMerge**<br>
 
 GitHub Enterpriseの対象リポジトリの画面からmergeを行います。<br/>
 手順は第3章の[「Merge 手順」](#merge)の通りです。<br/>
