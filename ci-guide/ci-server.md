@@ -1,11 +1,11 @@
 ## 第2章　CIサーバ環境構築
 
-本章では、前章で導入した仮想サーバ（CentOS7）へCI（継続的インテグレーション）ツールとして [「 Jenkins 」](https://jenkins.io/ )を導入し、
-さらにコンテンツ作成ツールである静的ページジェネレータ [「 Hexo 」](https://hexo.io/)の導入も行って、CIサーバの構築を行います。<br>
+本章では、前章で導入した仮想サーバ（CentOS 7）へCI（継続的インテグレーション）ツールとして [「 Jenkins 」](https://jenkins.io/ )と、
+コンテンツ作成ツールとして静的ページジェネレータである [「 Hexo 」](https://hexo.io/)を導入し、CIサーバの構築を行います。<br>
 
- ※なお、本書ではCentOS7でのご利用を前提に説明します。<br/>
- 　Ubuntu などの Debian 系では、インストールの際は yum コマンドではなく apt-get になります。<br/>
- 　またCentOSでは最新バージョンCentOS7とCentOS6以前の旧バージョンではコマンドが異なりますのでご注意下さい。<br/>
+ ※なお、本書ではCentOS 7でのご利用を前提に説明します。<br/>
+ 　Ubuntu などの Debian 系のOSでは、インストールの際は yum コマンドではなく apt-get になります。<br/>
+ 　またCentOSでは最新バージョンであるCentOS 7とCentOS 6以前の旧バージョンではコマンドが異なりますのでご注意下さい。<br/>
 
 ------------------------------------------------------------------------------------------------------
 
@@ -13,9 +13,9 @@
 
 #### Jenkinsのインストール<br/>
 
-CIツール 「 Jenkins 」 を仮想サーバ(CentOS7)へ導入します。<br/>
+CIツール 「 Jenkins 」 を仮想サーバ(CentOS 7)へ導入します。<br/>
 [「 Jenkins 」](https://jenkins.io/)の公式サイトから「Red Hat/Fedora/CentOS」パッケージのJenkinsをインストールします。<br/>
-以下の手順はrootユーザーで操作します。
+以下の手順はrootユーザで操作します。
 
 1.JDKの導入<br/>
    JenkinsはJavaで実装されているためJDKを導入します。<br/>
@@ -24,8 +24,7 @@ CIツール 「 Jenkins 」 を仮想サーバ(CentOS7)へ導入します。<br/
    `yum install java-1.8.0-openjdk java-1.8.0-openjdk-devel`
 
 2.yumリポジトリへJenkinsの情報を追加<br/>
-
-wgetコマンドを使用するため、導入がまだな方は`#yum install wget`でインストール<br/>
+   情報の追加にはwgetコマンドを使用するため、wgetコマンドが導入されていない場合は`#yum install wget`でインストールします。<br/>
 
 ```
 # wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
@@ -51,8 +50,8 @@ JENKINS_PORT="設定したいポート番号"
 
 5.使用するポートをファイアーウォールに登録
 
-CentOSではデフォルトでファイアウォールが設定されています。<br/>
-ポートを開放し、外部と接続します。<br/>
+CentOSはデフォルトでファイアウォールが設定されています。<br/>
+ポートを開放し、外部接続が可能になるよう設定を変更します。<br/>
 
  ```
  # firewall-cmd --zone=public --add-port [設定したいポート番号]/tcp --permanent
@@ -83,7 +82,7 @@ chkconfig jenkins on
 　<br/>
 
 初回起動時は管理者が起動していることを確認するため、管理者パスワード「Administrator password」の入力を求められます。（ 図１赤枠部分 ）<br/>
-管理者パスワード「Administrator password」は、Jenkinsをインストールした仮想マシンで確認できます。<br/>
+管理者パスワード「Administrator password」は、Jenkinsをインストールした仮想サーバで確認できます。<br/>
 
 `cat /var/lib/jenkins/secrets/initialAdminPassword`
 
@@ -106,12 +105,12 @@ chkconfig jenkins on
 - 「Install suggested plugins」（推奨プラグインの一括インストール）
 - 「Select plugins to install」（プラグインを選択してインストール）
 
-特に何もなければ、「Install suggested plugins」（推奨プラグインの一括インストール）を選択します。<br/>
+選択してインストールしたいプラグインがなければ、「Install suggested plugins」（推奨プラグインの一括インストール）を選択します。<br/>
 【 図4 Customize Jenkins画面 】
   ![Jenkins04](./image/jenkins_plugin.jpg)
 　<br/>
 
-「Install suggested plugins」を押下しましたら以下のように自動的にプラグインがインストールされて行きます。<br/>
+「Install suggested plugins」を押下しましたら以下のように自動的にプラグインがインストールされます。<br/>
 【 図5 Plugin Install画面 】
   ![Jenkins05](./image/jenkins_pluginInstall.jpg)
 　<br/>
@@ -124,13 +123,13 @@ chkconfig jenkins on
 必要な項目を入力して［ Save and Finish ］ボタンを押します。<br/>
 [ Continue as admin ]を選択した場合は、
 管理者アカウントのユーザー名は"admin"、
-パスワードは初回起動時に入力したものとなります。<br/>
+パスワードは初回起動時に入力したものになります。<br/>
 
 初期設定が問題なく準備できましたら「図6 準備完了画面」が表示されます。<br/>
 【 図7 準備完了画面 】
   ![Jenkins07](./image/jenkins_ready.jpg)
 　<br/>
-[ Start Using Jenkins ] ボタンを押下すれば、「Jenkinsオープニング画面」に入り、Jenkinsが利用できます。<br/>
+[ Start Using Jenkins ] ボタンを押下することで「Jenkinsオープニング画面」に移動し、Jenkinsが利用可能になります。<br/>
 【 図8 Jenkinsオープニング画面 】
   ![Jenkins08](./image/jenkins_opening.jpg)
 　<br/>
@@ -152,10 +151,10 @@ JENKINS_HOME                         | /var/lib/jenkins
 
 **Jenkinsユーザの権限設定の方法**<br/>
 
-CI環境を構築し、導入した各種ツールをJenkinsから操作する場合、仮想OSのJenkinsユーザに権限を与えたり、パスを通す必要があります。<br/>
-ただ、むやみに権限を与えるとセキュリティ面で重大な影響を及ぼしますのでご注意ください。<br/>
+CI環境を構築し、導入した各種ツールをJenkinsから操作する場合、仮想OSのJenkinsユーザに権限を与える、パスを通すなどの作業が必要があります。<br/>
+しかし、むやみに権限を与えるとセキュリティ面で重大な影響を及ぼしますのでご注意ください。<br/>
 以下、参考として例を示しますが、推奨しているわけではありません。<br/>
-権限やパスの設定に際しては必ず開発グループなどのセキュリティ規定を考慮してご判断してください。<br/>
+権限やパスの設定に際しては必ず開発グループなどのセキュリティ規定を考慮し、ご判断ください。<br/>
 
 -------------------------------------------------------------------------------------------------------------------------------------
 
@@ -217,7 +216,7 @@ root
 
 **ジョブ作成手順**<a name="job"></a><br/>
 
-Jenkins上で実行される処理を「ジョブ」と呼びます。Jenkinsを利用してCI環境を構築するには各種テストやデプロイなどの各「ジョブ」を作成していきます。<br/>
+Jenkins上で実行される処理を「ジョブ」と呼びます。Jenkinsを利用してCI環境を構築するには各種テストやデプロイなどの「ジョブ」を作成していきます。<br/>
 ここでは基本的な操作のみを紹介します。具体的なジョブの制作例は第7章で紹介します。<br/>
 
 「test-job」という名称のジョブを作成します。<br/>
@@ -232,7 +231,7 @@ Jenkins上で実行される処理を「ジョブ」と呼びます。Jenkinsを
 ![Jenkins11](./image/build_jenkins.jpg)
 　<br/>
 
-4. 行いたい処理のシェルスクリプトを記述します。<br/>
+4. 実施したい処理のシェルスクリプトを記述します。<br/>
 ここではコンソール画面に「Hello! Mr. Jenkins!」と表示する処理を記述します。<br/>
 「保存」ボタンを押下すればジョブの完成です。
 ![Jenkins12](./image/sh_jenkins.jpg)
@@ -243,7 +242,7 @@ Jenkins上で実行される処理を「ジョブ」と呼びます。Jenkinsを
 ビルドが成功していれば青い丸とともに履歴が表示されます。
 ![Jenkins13](./image/exe_jenkins.jpg)
 　<br/>
-6. 確認のためコンソール画面を見てみます。<br/>
+6. 確認のためコンソール画面を表示します。<br/>
 先程の「ビルド履歴」から確認したいビルドの「# 番号」を選び、押下します。<br/>
 左側のメニューの「コンソール出力」を押下すれば表示されます。
 ![Jenkins14](./image/console_jenkins.jpg)
@@ -252,11 +251,10 @@ Jenkins上で実行される処理を「ジョブ」と呼びます。Jenkinsを
 
 **Pipeline作成手順**<a name="pipeline"></a><br/>
 
-「Pipeline」とは、簡単にいえばジョブをつなげて自動で実行できる機能で、
-Jenkins 2.0以降では標準装備されています。<br/>
-Pipelineではビルドやテストなど実行したい処理（ステップ）を「ステージ」ごとに定義することが可能で、
-各ステージの管理が容易に行え、さらに開発・テストの進捗にあわせてステージの増減や順番の変更も容易に行えます。<br/>
-Jenkinsを利用してビルド→テスト→デプロイなどの流れを自動化する場合には「Pipeline」機能を利用してみましょう。<br/>
+「Pipeline」とは、各ジョブをつなげ、自動で処理（ステップ）を実行する機能です。Jenkins 2.0以降では標準装備されています。<br/>
+Pipelineではビルドやテストなど実行したい処理（ステップ）を「ステージ」ごとに定義することが可能であり、
+各ステージの管理が容易に行えます。さらに開発・テストの進捗にあわせてステージの増減や順番の変更も可能です。<br/>
+Jenkinsを利用してビルド→テスト→デプロイなどの流れを自動化する場合、「Pipeline」機能が活用できます。<br/>
 ここでは基本的な設定のみを紹介します。具体的な「Pipeline」の制作例は第7章で紹介します。<br/>
 
 動作環境<br/>
@@ -293,13 +291,13 @@ Jenkinsを利用してビルド→テスト→デプロイなどの流れを自�
   }
   ```
 また、Pipeline設定画面の下部にある「Pipeline Syntax」を押下するとサンプルコードやリファレンスを参照することができます。
-Jenkinsの公式サイトにも[ Pipeline Steps Reference ](https://jenkins.io/doc/pipeline/steps/)が掲載されていますのでご参考ください。
+Jenkinsの公式サイトに[ Pipeline Steps Reference ](https://jenkins.io/doc/pipeline/steps/)が掲載されていますのでご参考ください。
 ![Jenkins17](./image/pipelineSyntax.jpg)
 　<br/>
 
-基本的なPipelineを作成して実行してみます。<br/>
-Pipeline名は「test-pipeline」。<br/>
-実行する処理は Stage01「 Hello! Mr.Jenkins.」、Stage02「 Bye! Mr.Jenkins.」とコンソール出力をします。<br/>
+基本的なPipelineを作成して実行します。<br/>
+Pipeline名は「test-pipeline」とします。<br/>
+実行する処理は Stage01で「 Hello! Mr.Jenkins.」、Stage02で「 Bye! Mr.Jenkins.」とコンソールに出力します。<br/>
 
 ```
 node {
@@ -325,7 +323,7 @@ Jenkins ではプラグインにより機能を拡張することが出来るの
 プラグイン導入手順<br/>
 
 `トップ画面の「Jenkinsの管理」→「プラグインの管理」→「利用可能」から 利用したいプラグインを選択 `<br/>
-※Jenkins のプラグインには、そのプラグインを利用するために別のプラグインが必要な場合があります。<br/>
+※Jenkins のプラグインには、特定のプラグインを利用するために他のプラグインを導入する必要がある場合があります。<br/>
  プラグインの依存関係に注意してください。 <br/>
 ![Jenkins19](./image/plugin_jenkins.jpg)
 　<br/>
@@ -345,10 +343,10 @@ SSH鍵認証を行えるようになります。<br/>
 　<br/>
 
 **メール機能**<br/>
-Jenkinsではビルドの実行結果をメールで通知することができます。複数人で開発・テストを行う際には必要な設定です。<br/>
+Jenkinsではビルドの実行結果をメールで通知することができます。<br/>
 基本的な「E-mail 通知」機能では、ビルド失敗時にのみメールが送信される設定ですが、
-メール機能を拡張するプラグイン「Email Extension Plugin」を導入すれば、「拡張E-mail通知」の設定が可能になり、
-ビルド失敗時だけでなく成功時にも送ることが可能で、ビルドの実行状況に応じて送信内容を替えることも可能になるなどカスタマイズができます。<br/>
+メール機能を拡張するプラグイン「Email Extension Plugin」を導入すれば、「拡張E-mail通知」の設定が可能になります。
+ビルド失敗時だけでなく成功時にもメールを送信することができ、ビルドの実行状況に応じて送信内容を変更するなどのカスタマイズが可能になります。<br/>
 
 **基本的なメール設定**<br/>
 
@@ -380,15 +378,15 @@ SMTPポート                |   465(SMTP over SSL) または 587(SMTP TLS/START
 各ジョブでの設定<br/>
 
 メール通知を設定したいジョブの[ 設定画面 ] → [ ビルド後の処理 ]にある[ ビルド後の処理の追加 ]を押下し、プルダウンメニューから[ E-mail通知 ]を選択します。<br/>
-以下の画面が表示されますので宛先にアドレスを記入すればメールはビルド失敗時に送られるようになります。<br/>
+以下の画面が表示されますので、宛先にアドレスを記入することでメールがビルド失敗時に送信されるようになります。<br/>
 ![Jenkins20](./image/email_job.jpg)
 　<br/>
 
 **拡張E-mail通知の設定**<a name="extend_email"></a><br/>
 
 設定場所は `トップ画面「Jenkinsの管理」→「システムの設定」→「拡張E-mail 通知」`<br/>
-「拡張E-mail通知」では様々な設定が可能なため、設定項目も数多く用意されています。<br/>
-ここでは、最低限の項目の紹介にとどめます。<br/>
+「拡張E-mail通知」では様々な設定が可能であり、設定項目も数多く用意されています。<br/>
+本ガイドでは、最低限必要な項目の紹介のみ行います。<br/>
 
 設定項目                        | 設定する内容
 :------------------------------ | :------------------------------
@@ -412,7 +410,7 @@ Default Recipients              | 送信先メールアドレス
 
 設定項目の最後にある「トークンリファレンス」のヒントを押下すると利用可能なトークンの一覧が表示されます。<br/>
 
-適宜参考にして設定にご利用ください。<br/>
+適宜参考にしてください。<br/>
 
 【トークンリファレンス 画像】<br/>
 
@@ -429,7 +427,7 @@ Default Recipients              | 送信先メールアドレス
 
 ### 2-3. Hexo導入手順<a name="hexo"></a><br/>
 
- 本ガイドでは、静的ページジェネレータ [「 Hexo 」](https://hexo.io/)を利用した開発を行います。
+ 本ガイドでは、静的ページジェネレータ [「 Hexo 」](https://hexo.io/)を利用した開発を想定しています。
 
 1.　Hexo環境の導入手順
 
@@ -466,9 +464,9 @@ Hexo は Node で作成されているため Node.js の導入が必要となり
 
 2.　 Hexo 記事の作成と HTML の生成
 
- Hexo は Markdown 形式のファイルから HTMLファイル を生成します。
+ Hexo は Markdown 形式のファイルから HTMLファイル を作成します。
 
- Markdown 形式のファイルの作成も Hexo で行うことができ、新しい記事を追加していくことができます。
+ Markdown 形式のファイルも Hexo で作成でき、新しい記事を追加していくことができます。
 
  ここでは「 Hello Hexo 」というタイトルで記事を作成していきます。
 
@@ -478,7 +476,7 @@ Hexo は Node で作成されているため Node.js の導入が必要となり
 
  Hexo を導入したディレクトリ配下に` /source/_posts/Hello-Hexo.md ` が作成されます。
 
-生成された Markdown ファイルの中は以下のようになっています。
+作成された Markdown ファイルの中は以下のようになっています。
 
 ```
 source/_posts/Hello-Hexo.md
@@ -499,9 +497,9 @@ Markdown 形式で記載します。
 
 ```
 
-記事の作成が完了したら Markdown 形式ファイルから HTML ファイルへ生成します。
+記事の作成が完了したら Markdown 形式ファイルから HTML ファイルを作成します。
 
-` hexo generate ` コマンドで htmlファイルが生成され、publicフォルダ以下に格納されます。
+` hexo generate ` コマンドで htmlファイルが作成され、publicフォルダ以下に格納されます。
 
 以上で「 Hexo 」に新たな記事が追加されました。<br/>
 
@@ -514,9 +512,9 @@ Markdown 形式で記載します。
 
 テーマ（theme）の変更
 
->Hexoではテーマの変更も簡単に行えます。<br/>
+>Hexoではテーマの変更も容易に行えます。<br/>
 >
->以下手順です。
+>以下、テーマ変更手順です。
 >
 >①公式サイトの[ theme ](https://hexo.io/themes/)より好きなテーマを選びます。<br/>
 >②選択したテーマのタイトルのGithubページからクローンを行います。<br/>
