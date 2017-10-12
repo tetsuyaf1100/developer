@@ -1636,3 +1636,5 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
 - 実装サンプル(module/run\_Ansible(linux).jmx)
 
   「WEBサーバのセットアップ」と同じ実装サンプルを使用している為、省略します。
+
+[\[各手順の連携へ\]](coordination.md)
