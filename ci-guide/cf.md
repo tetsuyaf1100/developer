@@ -8,9 +8,15 @@
 
 ### 5-1. CF導入方法（ビルドパック）および環境設定方法<br/>
 
-[「 CF 使用手順チュートリアル 」](https://cf-docs.jp-east-1.paas.cloud.global.fujitsu.com/ja/manual/tut/tut/topics/preface.html)をご覧ください。<br/>
+[「 CF 使用手順チュートリアル 」](https://cf-docs.jp-east-1.paas.cloud.global.fujitsu.com/ja/manual/tut/tut/topics/preface.html)の「契約者のサービス利用開始の流れ」を参照し、ビルドパックを選択して配備、ユーザ登録を行って下さい。<br/>
+本ガイドで使用するビルドパックは「Staticfile」です。<br/>
 
-### 5-2. CFアップロード手順<br/>
+### 5-2. CFコマンドインストール<br/>
+
+仮想マシン CentOS 7 にCFコマンドをインストールします。<br/>
+[「CF 使用手順チュートリアル」](https://cf-docs.jp-east-1.paas.cloud.global.fujitsu.com/ja/manual/tut/tut/topics/preface.html)の「開発者のアプリケーション開発の流れ＞事前設定＞CFコマンドの事前設定」を参照し、インストールして下さい。<br/>
+
+### 5-3. CFアップロード手順<br/>
 
 CFへ資産をアップロードする手順を説明します。<br/>
 本ガイドで構築するCIではJenkinsによって開発資産をCFへデプロイします。その基本となる手順です。<br/>
@@ -22,12 +28,9 @@ CFコマンドに関しては[「リファレンス CF コマンド」](https://
 #アップロードするファイルがあるディレクトリへ移動
 cd <ディレクトリ名>
 
-#(必要に応じて)プロキシの設定
-set http_proxy="<ユーザ名>:<パスワード>@<プロキシのアドレス>:<プロキシのポート>/"
-set https_proxy="<ユーザ名>:<パスワード>@<プロキシのアドレス>:<プロキシのポート>/"
-
 #CFエンドポイントを設定
 cf api --skip-ssl-validation <APIエンドポイント>
+※<APIエンドポイント>：https://api.***.paas-cf.cloud.global.fujitsu.com ***部分はリージョン識別子
 
 #ログイン
 cf login -u <ユーザ名>@<契約番号> -o <契約番号> -s <スペース名>
