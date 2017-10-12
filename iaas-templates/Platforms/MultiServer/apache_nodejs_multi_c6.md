@@ -30,9 +30,9 @@ Apache + Node.js マルチインスタンス<br>テンプレート概要説明
 
 #### インストールするソフトウェア
 
->|ソフトウェア|バージョン|ライセンス|説明|
->|---|---|---|---|
->|Apache|2.2系|[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)|HTTPサーバ<br>yumによるインストール|
+|ソフトウェア|バージョン|ライセンス|説明|
+|---|---|---|---|
+|Apache|2.2系|[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)|HTTPサーバ<br>yumによるインストール|
 
 <br>
 
@@ -51,9 +51,9 @@ Apache + Node.js マルチインスタンス<br>テンプレート概要説明
 
 #### インストールするソフトウェア
 
->|ソフトウェア|バージョン|ライセンス|説明|
->|---|---|---|---|
->|Node.js|4系|[MIT License](https://opensource.org/licenses/mit-license.php)|サーバーサイドJavaScript環境|
+|ソフトウェア|バージョン|ライセンス|説明|
+|---|---|---|---|
+|Node.js|4系|[MIT License](https://opensource.org/licenses/mit-license.php)|サーバーサイドJavaScript環境|
 
 <br>
 
