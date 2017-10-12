@@ -30,9 +30,9 @@ Nginx Tomcat マルチインスタンス<br>テンプレート概要説明
 
 #### インストールするソフトウェア
 
->|ソフトウェア|バージョン|ライセンス|説明|
->|---|---|---|---|
->|Nginx|1.10.1|[2-clause BSD-like license.](http://nginx.org/LICENSE)|HTTPサーバ<br>yumによるインストール|
+|ソフトウェア|バージョン|ライセンス|説明|
+|---|---|---|---|
+|Nginx|1.10.1|[2-clause BSD-like license.](http://nginx.org/LICENSE)|HTTPサーバ<br>yumによるインストール|
 
 <br>
 
@@ -51,10 +51,10 @@ Nginx Tomcat マルチインスタンス<br>テンプレート概要説明
 
 #### インストールするソフトウェア
 
->|ソフトウェア|バージョン|ライセンス|説明|
->|---|---|---|---|
->|Tomcat|8.5.5|[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)|Appサーバ|
->|JDK|1.8.0 102|[Oracle Binary Code License (BCL)](http://www.oracle.com/technetwork/java/javase/terms/license/index.html)|Tomcat用JDK|
+|ソフトウェア|バージョン|ライセンス|説明|
+|---|---|---|---|
+|Tomcat|8.5.5|[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)|Appサーバ|
+|JDK|1.8.0 102|[Oracle Binary Code License (BCL)](http://www.oracle.com/technetwork/java/javase/terms/license/index.html)|Tomcat用JDK|
 
 <br>
 
