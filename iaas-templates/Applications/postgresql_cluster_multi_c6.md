@@ -72,9 +72,9 @@ PostgreSQLを３つのインスタンスにインストールし、クラスタ�
 
 #### インストールするソフトウェア
 
->|ソフトウェア|バージョン|ライセンス|説明|
->|---|---|---|---|
->|Postgres|9.5|[PostgreSQL License](https://opensource.org/licenses/postgresql)|PostgreSQLパッケージ|
+|ソフトウェア|バージョン|ライセンス|説明|
+|---|---|---|---|
+|Postgres|9.5|[PostgreSQL License](https://opensource.org/licenses/postgresql)|PostgreSQLパッケージ|
 
 <br>
 
