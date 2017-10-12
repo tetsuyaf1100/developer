@@ -30,12 +30,12 @@ Drupal MariaDB マルチインスタンス<br>テンプレート概要説明
 
 #### インストールするソフトウェア
 
->|ソフトウェア|バージョン|ライセンス|説明|
->|---|---|---|---|
->|Apache|2.2系|[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)|HTTPサーバ<br>yumによるインストール|
->|Drupal|8.1.8|[CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/)|CMS|
->|PHP|7.0.1|[PHP License v3.01,](http://www.php.net/license/3_01.txt)|PHP処理系|
->|MariaDB(クライアント)|10.1|[GNU GENERAL PUBLIC LICENSE Version 2](https://mariadb.com/kb/en/mariadb/mariadb-license/)|MariaDBクライアント|
+|ソフトウェア|バージョン|ライセンス|説明|
+|---|---|---|---|
+|Apache|2.2系|[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)|HTTPサーバ<br>yumによるインストール|
+|Drupal|8.1.8|[CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/)|CMS|
+|PHP|7.0.1|[PHP License v3.01,](http://www.php.net/license/3_01.txt)|PHP処理系|
+|MariaDB(クライアント)|10.1|[GNU GENERAL PUBLIC LICENSE Version 2](https://mariadb.com/kb/en/mariadb/mariadb-license/)|MariaDBクライアント|
 
 <br>
 
@@ -54,9 +54,9 @@ Drupal MariaDB マルチインスタンス<br>テンプレート概要説明
 
 #### インストールするソフトウェア
 
->|ソフトウェア|バージョン|ライセンス|説明|
->|---|---|---|---|
->|MariaDB(サーバ)|10.1|[GNU GENERAL PUBLIC LICENSE Version 2](https://mariadb.com/kb/en/mariadb/mariadb-license/)|MariaDBサーバ|
+|ソフトウェア|バージョン|ライセンス|説明|
+|---|---|---|---|
+|MariaDB(サーバ)|10.1|[GNU GENERAL PUBLIC LICENSE Version 2](https://mariadb.com/kb/en/mariadb/mariadb-license/)|MariaDBサーバ|
 
 <br>
 
