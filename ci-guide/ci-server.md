@@ -27,8 +27,8 @@ CIツール 「 Jenkins 」 を仮想サーバ(CentOS 7)へ導入します。<br
    情報の追加にはwgetコマンドを使用するため、wgetコマンドが導入されていない場合は`#yum install wget`でインストールします。<br/>
 
 ```
-# wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
-# rpm --import http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key
+# wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins-ci.org/redhat/jenkins.repo
+# rpm --import https://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key
 ```
 
 3.Jenkinsをインストール
@@ -60,10 +60,10 @@ K5 IaaS サービスポータルより、仮想サーバのセキュリティグ
 
 ```
 #起動
-service jenkins start
+systemctl start jenkins
 
 #停止
-service jenkins stop
+systemctl stop jenkins
 
 #システム起動時に自動起動させる設定
 chkconfig jenkins on
@@ -433,18 +433,24 @@ Hexo は Node で作成されているため Node.js の導入が必要となり
 
 Node.js 導入手順
 
+
+参考サイト<br/>
+・[node.js公式](https://nodejs.org)<br/>
+・[nvm公式リポジトリ](https://github.com/creationix/nvm)<br/>
+
 ```
 #node.jsのバージョン管理ツール nvm をgitから取得します。
 yum -y install git
-git clone git://github.com/creationix/nvm.git ~/.nvm
+git clone https://github.com/creationix/nvm.git .nvm
 source ~/.nvm/nvm.sh
 
 #インストール可能なnode.jsのバージョンを確認
 nvm ls-remote
 
 #node.jsの導入
-nvm install {バージョン}　※例：v0.33.4（2017.10現在 最新版）
-                         ※本ガイドでは導入の前提としてnodeのバージョンがv0.11.15以上必要です。
+nvm install {バージョン}　
+※例：v6.11.4（2017.10現在 最新安定版(LTS)）
+※本ガイドでは導入の前提としてnodeのバージョンがv0.11.15以上必要です。
 
 #nodeが正しく導入されたか確認します。
 node -v
