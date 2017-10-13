@@ -1501,11 +1501,14 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
     SSH接続を行い、アップロードしたファイルを解凍します。
     このサンプルでは、zip圧縮されている事を前提とした作りになっています。
   1. インベントリファイル作成
-     インベントリファイルを作成する為、SSH接続を行い、以下のコマンドを実行します。(説明の為、2行に分けていますが、実際には1行です)
+     インベントリファイルを作成する為、SSH接続を行い、以下のコマンドを実行します。
 
      ```
-     $ echo "[${host_group_name}]"    ${conf_dst_dir_path}/${inventory_file_name} ;
-     $ echo "${target_server_port_ip} ansible_ssh_private_key_file=${conf_dst_dir_path}/${key_dst_file_name}"     ${conf_dst_dir_path}/${inventory_file_name}
+     $ echo "[${host_group_name}]" \
+       ${conf_dst_dir_path}/${inventory_file_name} ; \
+       echo "${target_server_port_ip} \
+       ansible_ssh_private_key_file=${conf_dst_dir_path}/${key_dst_file_name}" \
+       ${conf_dst_dir_path}/${inventory_file_name}
      ```
 
      ${}で指定された箇所は該当する変数が展開されます。
