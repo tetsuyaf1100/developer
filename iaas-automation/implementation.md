@@ -15,6 +15,7 @@
 - JMeterをGUIモードで起動
 - 「ファイル」＞「開く」の順にクリック
 - 該当するファイルを選択し「開く」をクリック
+
 ---
 
 各手順の説明は、基本的にその手順内に留まっており、手順間の連携については「手順の連携」を参照してください。
@@ -70,6 +71,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
      JMeterのHTTPリクエスト機能を使用してAPIリクエストを行っています。
      ![認証リクエスト](images/auth-request.jpg)
      リクエストボディについては、以下のテンプレートに対して、入力されたパラメータを当てはめるように設定します。
+
      ```
      {
        "auth": {
@@ -98,6 +100,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
        }
      }
      ```
+
   1. トークン抽出
     JMeterの基本機能(正規表現抽出)で、レスポンスヘッダに含まれているトークンの値を取り出します。
     対象のヘッダは「X-Subject-Token」になります。
@@ -247,6 +250,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
 
   (補足)
   サンプル上では共通ネットワークサービスの情報が記述されたjsonファイル(data/az\_value.json)を以下の内容で作成します。
+
   ```
   {
     "jp-east-1a": {
@@ -278,6 +282,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
     ・・・以下、各AZとリージョンが続く・・・
   }
   ```
+
   上記からjp-east-1bのDNSサーバのリスト("133.162.201.9" 及び "133.162.201.10")を取得する為に指定する「${extraction\_path}」は「$.jp-east-1b.name\_servers」となります。
 
 ### キーペアの作成(API)
@@ -958,6 +963,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
 
   IaaSのAPIを使用して、SSL-VPNサービスを作成します。
   SSL-VPNサービスの作成には以下の情報が必要になります。
+
   - SSL-VPN接続先サブネットのCIDR
   - SSL-VPNサービスを作成するルータのID
 
@@ -1007,6 +1013,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
 
   IaaSのAPIを使用して、SSL-VPNコネクションを作成します。
   SSL-VPNコネクションの作成には以下の情報が必要になります。
+
   - SSL-VPNのサービスID
   - 使用する鍵情報コンテナID
   - VPNトンネルの仮想ネットワークCIDR(クライアントアドレスCIDR)
@@ -1019,6 +1026,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
   > GET {networkのエンドポイント}/v2.0/vpn/ssl-vpn-v2-connections/{sslvpnv2connection-id}
 
   ステータスが「ACTIVE」になると以下の「external\_address」にSSL-VPNのグローバルIPアドレスが割り当てられます。
+
   ```
   {
     "ssl_vpn_v2_connections": [
@@ -1381,12 +1389,14 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
 
   セットアップにあたって、必要なファイル類を構成管理ツール用サーバへアップロードします。
   必要なファイルは以下の通りです。
+
   - WEBサーバへのアクセスに必要な秘密鍵
   - セットアップ内容が記述されたプレイブック
 
   このファイル類は連携ツールの実行クライアントのローカルファイルとして存在する事を前提としています。
 
   また、構成管理ツール用サーバにセットアップ対象サーバ専用の以下のファイルを作成する必要があります。
+
   - セットアップ対象サーバのアクセス情報等が定義されたインベントリファイル
   - セットアップコマンドの動作等の指定する設定ファイル(ansible.cfg)
 
@@ -1416,9 +1426,11 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
   1. SSHの警告回避
      WEBサーバへアクセスするにあたって、AnsibleからSSHでアクセス初めてアクセスする場合は、OpenSSHのチェック機能により警告が発生し、セットアップがエラーで終了します。
      これを回避する為、サンプルでは「ansible.cfg」に
+
      ```
      host_key_checking = false
      ```
+
      を入力します。
   1. 秘密鍵のアクセス権
     アップロードの秘密鍵のアクセス権が適切でない場合、セットアップ時にエラーが発生します。
@@ -1426,13 +1438,17 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
   1. 対象ホストのコントロール
      プレイブックに記述している情報と、WEBサーバの情報に齟齬がないようにインベントリファイルを作成するように実装してください。
      例えば
+
      - WEBサーバのアドレス：192.168.0.5
      - プレイブックのhosts：web-server
-    となっている場合、インベントリファイルの内容は
+
+     となっている場合、インベントリファイルの内容は
+
      ```
      [web-server]
      192.168.0.5
      ```
+
      のように、プレイブックのhostsに記述された内容と、対象ホストのアドレスが紐づく必要があります。
 
 - 実装サンプル(module/run\_Ansible(linux).jmx)
@@ -1455,9 +1471,11 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
 
   1. 設定ファイルの設置ディレクトリの作成
      構成管理ツール用サーバに、セットアップ対象専用の設定ディレクトリを作成する為、SSH接続を行い、以下のコマンドを実行します。
+
      ```
-     mkdir -p ${conf_dst_dir_path}
+     $ mkdir -p ${conf_dst_dir_path}
      ```
+
      ${}で指定された箇所は該当する変数が展開されます。
      SSHの実行は専用の部品(module/run\_ssh\_command.jmx)を呼び出します。
      部品内ではJMeterに追加した「SSH Command」の機能を使用して、指定されたホストで指定されたコマンドを実行します。
@@ -1474,37 +1492,46 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
     このサンプルでは、zip圧縮されている事を前提とした作りになっています。
   1. インベントリファイル作成
      インベントリファイルを作成する為、SSH接続を行い、以下のコマンドを実行します。(説明の為、2行に分けていますが、実際には1行です)
+
      ```
-     echo "[${host_group_name}]"    ${conf_dst_dir_path}/${inventory_file_name} ;
-     echo "${target_server_port_ip} ansible_ssh_private_key_file=${conf_dst_dir_path}/${key_dst_file_name}"     ${conf_dst_dir_path}/${inventory_file_name}
+     $ echo "[${host_group_name}]"    ${conf_dst_dir_path}/${inventory_file_name} ;
+     $ echo "${target_server_port_ip} ansible_ssh_private_key_file=${conf_dst_dir_path}/${key_dst_file_name}"     ${conf_dst_dir_path}/${inventory_file_name}
      ```
+
      ${}で指定された箇所は該当する変数が展開されます。
      1行目はホストグループ名をインベントリファイルに記述しています。
      2行目は対象ホストと対象ホストに接続する際に使用する秘密鍵のパスを追記しています。
      SSHの実行は専用の部品(module/run\_ssh\_command.jmx)を呼び出しています。
   1. ansible.cfg作成
      ansible.cfgを作成する為、SSH接続を行い、以下のコマンドを実行しています。(説明の為、2行に分けていますが、実際には1行です)
+
      ```
-     echo "[defaults]"    ${conf_dst_dir_path}/ansible.cfg ;
-     echo "host_key_checking = False"     ${conf_dst_dir_path}/ansible.cfg
+     $ echo "[defaults]"    ${conf_dst_dir_path}/ansible.cfg ;
+     $ echo "host_key_checking = False"     ${conf_dst_dir_path}/ansible.cfg
      ```
+
      ${}で指定された箇所は該当する変数が展開されます。
      1行目はansibleのデフォルトセクションの宣言をしています。
      2行目はSSH接続の際に、OpenSSHのチェック機能による警告を無視する設定を入れています。
      SSHの実行は専用の部品(module/run\_ssh\_command.jmx)を呼び出しています。
   1. ターゲット用秘密鍵ファイルのアクセス権変更
      セットアップ実行時に権限エラーを回避する為、ターゲット用秘密鍵ファイルのアクセス権の変更を以下のコマンドで行います。
+
      ```
-     chmod 600 ${conf_dst_dir_path}/${key_dst_file_name}
+     $ chmod 600 ${conf_dst_dir_path}/${key_dst_file_name}
      ```
+
      ${}で指定された箇所は該当する変数が展開されます。
      SSHの実行は専用の部品(module/run\_ssh\_command.jmx)を呼び出しています。
   1. セットアップ実行
-     ansible-playbookコマンドを使用して、セットアップを実行します。(説明の為、2行に分けていますが、実際には1行です)
+     ansible-playbookコマンドを使用して、セットアップを実行します。
+
      ```
-     cd ${conf_dst_dir_path} ;
-     ansible-playbook -i ${conf_dst_dir_path}/${inventory_file_name} --extra-vars ${extra_vars} ${conf_dst_dir_path}/${playbook_file_name}
+     $ cd ${conf_dst_dir_path} ; \
+       ansible-playbook -i ${conf_dst_dir_path}/${inventory_file_name} \
+       --extra-vars ${extra_vars} ${conf_dst_dir_path}/${playbook_file_name}
      ```
+
      ${}で指定された箇所は該当する変数が展開されます。
      1行目は設定ディレクトリへ移動しています。
      これは、カレントディレクトリに存在するansibe.cfgを読み込ませる為に行っています。
