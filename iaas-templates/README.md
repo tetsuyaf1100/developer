@@ -31,11 +31,11 @@
 
 | テンプレート概要 | テンプレートファイル |
 | :--------------- | :------------------- |
-| インスタンスを2つ用意します。それぞれにWebサーバ（Apache）とNode.jsをインストールし、両サーバ間を連携させます。Node.js上で機能する簡易Appサーバを配置します。[[詳細へ]](Platforms/MultiServer/apache_nodejs_multi_c6.md) | [apache_nodejs_multi_c6.yaml](Platforms/MultiServer/apache_nodejs_multi_c6.yaml) |
-| インスタンスを2つ用意します。それぞれにWebサーバ（Apache）とAppサーバ（Tomcat）をインストールし、両サーバ間を連携させます。[[詳細へ]](Platforms/MultiServer/apache_tomcat_multi_c6.md) | [apache_tomcat_multi_c6.yaml](Platforms/MultiServer/apache_tomcat_multi_c6.yaml) |
-| インスタンスを2つ用意します。それぞれにWebサーバ（Nginx）とNode.jsをインストールし、両サーバ間を連携させます。Node.js上で機能する簡易Appサーバを配置します。[[詳細へ]](Platforms/MultiServer/nginx_nodejs_multi_c6.md) | [nginx_nodejs_multi_c6.yaml](Platforms/MultiServer/nginx_nodejs_multi_c6.yaml) |
-| インスタンスを2つ用意します。それぞれにWebサーバ（Nginx）とAppサーバ（Tomcat）をインストールし、両サーバ間を連携させます。[[詳細へ]](Platforms/MultiServer/nginx_tomcat_multi_c6.md) | [nginx_tomcat_multi_c6.yaml](Platforms/MultiServer/nginx_tomcat_multi_c6.yaml) |
-| 1つのインスタンス上にWebサーバ（Apache）、Node.jsをインストールし、連携させます。Node.js上で機能する簡易Appサーバを配置します。[[詳細へ]](Platforms/SingleServer/apache_nodejs_single_c6.md) | [apache_nodejs_single_c6.yaml](Platforms/SingleServer/apache_nodejs_single_c6.yaml) |
-| 1つのインスタンス上にWebサーバ（Apache）とAppサーバ（Tomcat）を作成し、連携させます。[[詳細へ]](Platforms/SingleServer/apache_tomcat_single_c6.md) | [apache_tomcat_single_c6.yaml](Platforms/SingleServer/apache_tomcat_single_c6.yaml) |
-| 1つのインスタンス上にWebサーバ（Nginx）、Node.jsをインストールし、連携させます。Node.js上で機能する簡易Appサーバを配置します。[[詳細へ]](Platforms/SingleServer/nginx_nodejs_single_c6.md) | [nginx_nodejs_single_c6.yaml](Platforms/SingleServer/nginx_nodejs_single_c6.yaml) |
-| 1つのインスタンス上にWebサーバ（Nginx）とAppサーバ（Tomcat）を作成し、連携させます。[[詳細へ]](Platforms/SingleServer/nginx_tomcat_single_c6.md) | [nginx_tomcat_single_c6.yaml](Platforms/SingleServer/nginx_tomcat_single_c6.yaml) |
+| インスタンスを2つ用意します。それぞれにWebサーバ（Apache）とNode.jsをインストールし、両サーバ間を連携させます。Node.js上で機能する簡易Appサーバを配置します。[[詳細へ]](Platforms/apache_nodejs_multi_c6.md) | [apache_nodejs_multi_c6.yaml](Platforms/apache_nodejs_multi_c6.yaml) |
+| インスタンスを2つ用意します。それぞれにWebサーバ（Apache）とAppサーバ（Tomcat）をインストールし、両サーバ間を連携させます。[[詳細へ]](Platforms/apache_tomcat_multi_c6.md) | [apache_tomcat_multi_c6.yaml](Platforms/apache_tomcat_multi_c6.yaml) |
+| インスタンスを2つ用意します。それぞれにWebサーバ（Nginx）とNode.jsをインストールし、両サーバ間を連携させます。Node.js上で機能する簡易Appサーバを配置します。[[詳細へ]](Platforms/nginx_nodejs_multi_c6.md) | [nginx_nodejs_multi_c6.yaml](Platforms/nginx_nodejs_multi_c6.yaml) |
+| インスタンスを2つ用意します。それぞれにWebサーバ（Nginx）とAppサーバ（Tomcat）をインストールし、両サーバ間を連携させます。[[詳細へ]](Platforms/nginx_tomcat_multi_c6.md) | [nginx_tomcat_multi_c6.yaml](Platforms/nginx_tomcat_multi_c6.yaml) |
+| 1つのインスタンス上にWebサーバ（Apache）、Node.jsをインストールし、連携させます。Node.js上で機能する簡易Appサーバを配置します。[[詳細へ]](Platforms/apache_nodejs_single_c6.md) | [apache_nodejs_single_c6.yaml](Platforms/apache_nodejs_single_c6.yaml) |
+| 1つのインスタンス上にWebサーバ（Apache）とAppサーバ（Tomcat）を作成し、連携させます。[[詳細へ]](Platforms/apache_tomcat_single_c6.md) | [apache_tomcat_single_c6.yaml](Platforms/apache_tomcat_single_c6.yaml) |
+| 1つのインスタンス上にWebサーバ（Nginx）、Node.jsをインストールし、連携させます。Node.js上で機能する簡易Appサーバを配置します。[[詳細へ]](Platforms/nginx_nodejs_single_c6.md) | [nginx_nodejs_single_c6.yaml](Platforms/nginx_nodejs_single_c6.yaml) |
+| 1つのインスタンス上にWebサーバ（Nginx）とAppサーバ（Tomcat）を作成し、連携させます。[[詳細へ]](Platforms/nginx_tomcat_single_c6.md) | [nginx_tomcat_single_c6.yaml](Platforms/nginx_tomcat_single_c6.yaml) |

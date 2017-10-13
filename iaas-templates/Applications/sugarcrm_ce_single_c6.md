@@ -39,7 +39,7 @@ SugarCRM-CE シングルインスタンス<br>テンプレート概要説明
 
 ### 作成方法
 
-[IaaSテンプレート利用ガイド](https://github.com/k5-community/developer/tree/master/iaas-templates/template_users_guide.md)を参照して下さい。
+[IaaSテンプレート利用ガイド](../usage.md)を参照して下さい。
 
 <br>
 

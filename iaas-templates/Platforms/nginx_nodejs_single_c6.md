@@ -1,11 +1,11 @@
-Apache + Node.js シングルインスタンス<br>テンプレート概要説明
+Nginx + Node.js シングルインスタンス<br>テンプレート概要説明
 ====
 
 <br>
 
 ### 概要
 
-１つのインスタンス上にWebサーバ（Apache）、Node.jsをインストールし、連携させます。Node.js上で機能する簡易Appサーバを配置します。
+１つのインスタンス上にWebサーバ（Nginx）、Node.jsをインストールし、連携させます。Node.js上で機能する簡易Appサーバを配置します。
 
 <br>
 
@@ -30,14 +30,14 @@ Apache + Node.js シングルインスタンス<br>テンプレート概要説�
 
 |ソフトウェア|バージョン|ライセンス|説明|
 |---|---|---|---|
-|Apache|2.2系|[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)|HTTPサーバ<br>yumによるインストール|
+|Nginx|1.10.1|[2-clause BSD-like license.](http://nginx.org/LICENSE)|HTTPサーバ<br>yumによるインストール|
 |Node.js|4系|[MIT License](https://opensource.org/licenses/mit-license.php)|サーバーサイドJavaScript環境|
 
 <br>
 
 ### 作成方法
 
-[IaaSテンプレート利用ガイド](https://github.com/k5-community/developer/tree/master/iaas-templates/template_users_guide.md)を参照して下さい。
+[IaaSテンプレート利用ガイド](../usage.md)を参照して下さい。
 
 <br>
 

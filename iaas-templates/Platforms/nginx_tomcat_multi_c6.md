@@ -1,17 +1,17 @@
-Apache + Tomcat マルチインスタンス<br>テンプレート概要説明
+Nginx Tomcat マルチインスタンス<br>テンプレート概要説明
 ====
 
 <br>
 
 ### 概要
 
-インスタンスを２つ用意します。それぞれにWebサーバ（Apache）とAppサーバ（Tomcat）をインストールし、両サーバ間を連携させます。
+インスタンスを２つ用意します。それぞれにWebサーバ（Nginx）とAppサーバ（Tomcat）をインストールし、両サーバ間を連携させます。
 
 <br>
 
 ### 作成されるシステムの構成図
 
-![構成図](images/diag_apache_tomcat_multi.png)
+![構成図](images/diag_nginx_tomcat_multi.png)
 
 <br>
 
@@ -32,7 +32,7 @@ Apache + Tomcat マルチインスタンス<br>テンプレート概要説明
 
 >|ソフトウェア|バージョン|ライセンス|説明|
 >|---|---|---|---|
->|Apache|2.2系|[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)|HTTPサーバ<br>yumによるインストール|
+>|Nginx|1.10.1|[2-clause BSD-like license.](http://nginx.org/LICENSE)|HTTPサーバ<br>yumによるインストール|
 
 <br>
 
@@ -60,7 +60,7 @@ Apache + Tomcat マルチインスタンス<br>テンプレート概要説明
 
 ### 作成方法
 
-[IaaSテンプレート利用ガイド](https://github.com/k5-community/developer/tree/master/iaas-templates/template_users_guide.md)を参照して下さい。
+[IaaSテンプレート利用ガイド](../usage.md)を参照して下さい。
 
 <br>
 
@@ -71,12 +71,12 @@ Apache + Tomcat マルチインスタンス<br>テンプレート概要説明
 |keypair_name|string|使用する証明書の鍵を指定|
 |availability_zone|string|アベイラビリティーゾーンを指定|
 |dns_nameservers|comma_delimited_list|DNSネームサーバを指定<br>`['xxx.xxx.xxx.xxx', 'yyy.yyy.yyy.yyy']`形式|
-|network_id_apache|string|インスタンス１が所属するネットワークIDを指定|
-|subnet_id_apache|string |インスタンス１が所属するサブネットIDを指定|
+|network_id_nginx|string |インスタンス１が所属するネットワークIDを指定|
+|subnet_id_nginx|string  |インスタンス１が所属するサブネットIDを指定|
 |network_id_tomcat|string|インスタンス２が所属するネットワークIDを指定|
 |subnet_id_tomcat|string |インスタンス２が所属するサブネットIDを指定|
 |remote_host_cidr|string|サーバへのSSH接続を許可するCIDRを指定|
-|apache_host_cidr|string|WebサーバへのSSH接続を許可するCIDRを指定|
+|nginx_host_cidr|string |WebサーバへのSSH接続を許可するCIDRを指定|
 |tomcat_host_cidr|string|AppサーバへのSSH接続を許可するCIDRを指定|
 |flavor|string|作成するインスタンスのフレーバーを指定|
 
@@ -88,16 +88,16 @@ Apache + Tomcat マルチインスタンス<br>テンプレート概要説明
 
 |プロトコル|ingress|egress|対象IPアドレス|ポート|
 |---|---|---|---|---|
-|ICMP           |●|－|remote_host_cidr  |ICMP |
-|SSH(TCP)       |●|－|remote_host_cidr  |SSH  |
-|HTTP(TCP)      |－|●|0.0.0.0/0         |HTTP |
-|HTTPS(TCP)     |－|●|0.0.0.0/0         |HTTPS|
-|TCP            |－|●|dns_nameservers,0 |DNS  |
-|TCP            |－|●|dns_nameservers,1 |DNS  |
-|UDP            |－|●|dns_nameservers,0 |DNS  |
-|UDP            |－|●|dns_nameservers,1 |DNS  |
-|TCP            |－|●|169.254.169.254/32|HTTP |
-|AJP-APACHE(TCP)|－|●|tomcat_host_cidr  |8009 |
+|ICMP      |●|－|remote_host_cidr  |ICMP |
+|SSH(TCP)  |●|－|remote_host_cidr  |SSH  |
+|HTTP(TCP) |－|●|0.0.0.0/0         |HTTP |
+|HTTPS(TCP)|－|●|0.0.0.0/0         |HTTPS|
+|TCP       |－|●|dns_nameservers,0 |DNS  |
+|TCP       |－|●|dns_nameservers,1 |DNS  |
+|UDP       |－|●|dns_nameservers,0 |DNS  |
+|UDP       |－|●|dns_nameservers,1 |DNS  |
+|TCP       |－|●|169.254.169.254/32|HTTP |
+|PROXY(TCP)|－|●|tomcat_host_cidr  |8080 |
 
 <br>
 
@@ -107,16 +107,16 @@ Apache + Tomcat マルチインスタンス<br>テンプレート概要説明
 
 |プロトコル|ingress|egress|対象IPアドレス|ポート|
 |---|---|---|---|---|
-|ICMP           |●|－|remote_host_cidr  |ICMP |
-|SSH(TCP)       |●|－|remote_host_cidr  |SSH  |
-|HTTP(TCP)      |－|●|0.0.0.0/0         |HTTP |
-|HTTPS(TCP)     |－|●|0.0.0.0/0         |HTTPS|
-|TCP            |－|●|dns_nameservers,0 |DNS  |
-|TCP            |－|●|dns_nameservers,1 |DNS  |
-|UDP            |－|●|dns_nameservers,0 |DNS  |
-|UDP            |－|●|dns_nameservers,1 |DNS  |
-|TCP            |－|●|169.254.169.254/32|HTTP |
-|AJP-APACHE(TCP)|●|－|apache_host_cidr  |8009 |
+|ICMP      |●|－|remote_host_cidr  |ICMP |
+|SSH(TCP)  |●|－|remote_host_cidr  |SSH  |
+|HTTP(TCP) |－|●|0.0.0.0/0         |HTTP |
+|HTTPS(TCP)|－|●|0.0.0.0/0         |HTTPS|
+|TCP       |－|●|dns_nameservers,0 |DNS  |
+|TCP       |－|●|dns_nameservers,1 |DNS  |
+|UDP       |－|●|dns_nameservers,0 |DNS  |
+|UDP       |－|●|dns_nameservers,1 |DNS  |
+|TCP       |－|●|169.254.169.254/32|HTTP |
+|PROXY(TCP)|●|－|nginx_host_cidr   |8080 |
 
 <br>
 
