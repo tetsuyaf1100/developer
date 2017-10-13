@@ -48,16 +48,13 @@ JENKINS_PORT="設定したいポート番号"
 -----省略-----
 ```
 
-5.使用するポートをファイアーウォールに登録
+5.使用するポートをセキュリティグループおよびファイアウォールに設定
 
-CentOSはデフォルトでファイアウォールが設定されています。<br/>
-ポートを開放し、外部接続が可能になるよう設定を変更します。<br/>
+K5 IaaS サービスポータルより、仮想サーバのセキュリティグループおよび仮想ネットワークのファイアウォールにJenkinsのポートを許可するルールを追加します。
 
- ```
- # firewall-cmd --zone=public --add-port [設定したいポート番号]/tcp --permanent
-
- # firewall-cmd --reload
- ```
+詳しくは以下をご覧下さい。<br>
+・[IaaS 機能説明書 セキュリティグループ機能](https://k5-doc.jp-east-1.paas.cloud.global.fujitsu.com/doc/jp/iaas/document/function-manual/index.html#concept/concept_network_securitygroup.html)<br>
+・[IaaS 機能説明書 ファイアーウォールサービス](https://k5-doc.jp-east-1.paas.cloud.global.fujitsu.com/doc/jp/iaas/document/function-manual/index.html#concept/concept_network_fwaas.html)<br>
 
 6.Jenkinsを起動
 
