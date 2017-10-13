@@ -1,21 +1,14 @@
-GitLab Community Edition シングルインスタンス<br>テンプレート概要説明
-====
+# GitLab Community Edition シングルインスタンス テンプレート概要説明
 
-<br>
-
-### 概要
+## 概要
 
 インスタンスを作成し、GitLabをインストールします。
 
-<br>
-
-### 作成されるシステムの構成図
+## 作成されるシステムの構成図
 
 ![構成図](images/diag_single.png)
 
-<br>
-
-### インスタンスの詳細
+## インスタンスの詳細
 
 |項目|内容|
 |---|---|
@@ -24,23 +17,17 @@ GitLab Community Edition シングルインスタンス<br>テンプレート概
 |フレーバータイプ|S-1|
 |ボリュームタイプ|M1|
 
-<br>
-
-#### インストールするソフトウェア
+### インストールするソフトウェア
 
 |ソフトウェア|バージョン|ライセンス|説明|
 |---|---|---|---|
 |GitLab|最新パッケージ|[MIT](https://github.com/tcnksm/tool/blob/master/LICENCE)|Community Edition|
 
-<br>
-
-### 作成方法
+## 作成方法
 
 [IaaSテンプレート利用ガイド](../usage.md)を参照して下さい。
 
-<br>
-
-### 作成時パラメタ
+## 作成時パラメタ
 
 |パラメタ名|入力する値の型|説明|
 |---|---|---|
@@ -52,9 +39,7 @@ GitLab Community Edition シングルインスタンス<br>テンプレート概
 |remote_host_cidr|string|サーバへのSSH接続を許可するCIDRを指定|
 |flavor|string|作成するインスタンスのフレーバーを指定|
 
-<br>
-
-### セキュリティグループ
+## セキュリティグループ
 
 |プロトコル|ingress|egress|対象IPアドレス|ポート|
 |---|---|---|---|---|
@@ -68,20 +53,12 @@ GitLab Community Edition シングルインスタンス<br>テンプレート概
 |UDP       |－|●|dns_nameservers,1 |DNS  |
 |TCP       |－|●|169.254.169.254/32|HTTP |
 
-<br>
-
-### 出力情報
+## 出力情報
 
 インスタンスのIPアドレスを`http://xxx.xxx.xxx.xxx`形式で出力
 
-<br>
-
-### 起動方法
+## 起動方法
 
 出力情報のIPアドレスにブラウザからアクセス
 
-<br>
-
-### その他
-
----
+## その他

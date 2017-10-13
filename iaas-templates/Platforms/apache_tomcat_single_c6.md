@@ -1,21 +1,14 @@
-Apache + Tomcat シングルインスタンス<br>テンプレート概要説明
-====
+# Apache + Tomcat シングルインスタンス<br>テンプレート概要説明
 
-<br>
-
-### 概要
+## 概要
 
 １つのインスタンス上にWebサーバ（Apache）とAppサーバ（Tomcat）を作成し、連携させます。
 
-<br>
-
-### 作成されるシステムの構成図
+## 作成されるシステムの構成図
 
 ![構成図](images/diag_single.png)
 
-<br>
-
-### インスタンスの詳細
+## インスタンスの詳細
 
 |項目|内容|
 |---|---|
@@ -24,9 +17,7 @@ Apache + Tomcat シングルインスタンス<br>テンプレート概要説明
 |フレーバータイプ|S-1|
 |ボリュームタイプ|M1|
 
-<br>
-
-#### インストールするソフトウェア
+### インストールするソフトウェア
 
 |ソフトウェア|バージョン|ライセンス|説明|
 |---|---|---|---|
@@ -34,15 +25,11 @@ Apache + Tomcat シングルインスタンス<br>テンプレート概要説明
 |Tomcat|8.5.5|[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)|Appサーバ|
 |JDK|1.8.0 102|[Oracle Binary Code License (BCL)](http://www.oracle.com/technetwork/java/javase/terms/license/index.html)|Tomcat用JDK|
 
-<br>
-
-### 作成方法
+## 作成方法
 
 [IaaSテンプレート利用ガイド](../usage.md)を参照して下さい。
 
-<br>
-
-### 作成時パラメタ
+## 作成時パラメタ
 
 |パラメタ名|入力する値の型|説明|
 |---|---|---|
@@ -54,9 +41,7 @@ Apache + Tomcat シングルインスタンス<br>テンプレート概要説明
 |remote_host_cidr|string|サーバへのSSH接続を許可するCIDRを指定|
 |flavor|string|作成するインスタンスのフレーバーを指定|
 
-<br>
-
-### セキュリティグループ
+## セキュリティグループ
 
 |プロトコル|ingress|egress|対象IPアドレス|ポート|
 |---|---|---|---|---|
@@ -70,20 +55,12 @@ Apache + Tomcat シングルインスタンス<br>テンプレート概要説明
 |UDP       |－|●|dns_nameservers,1 |DNS  |
 |TCP       |－|●|169.254.169.254/32|HTTP |
 
-<br>
-
-### 出力情報
+## 出力情報
 
 インスタンスのIPアドレスを`http://xxx.xxx.xxx.xxx`形式で出力
 
-<br>
-
-### 起動方法
+## 起動方法
 
 出力情報のIPアドレスにブラウザからアクセス
 
-<br>
-
-### その他
-
----
+## その他

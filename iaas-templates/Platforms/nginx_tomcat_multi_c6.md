@@ -1,23 +1,16 @@
-Nginx Tomcat マルチインスタンス<br>テンプレート概要説明
-====
+# Nginx Tomcat マルチインスタンス テンプレート概要説明
 
-<br>
-
-### 概要
+## 概要
 
 インスタンスを２つ用意します。それぞれにWebサーバ（Nginx）とAppサーバ（Tomcat）をインストールし、両サーバ間を連携させます。
 
-<br>
-
-### 作成されるシステムの構成図
+## 作成されるシステムの構成図
 
 ![構成図](images/diag_nginx_tomcat_multi.png)
 
-<br>
+## インスタンスの詳細
 
-### インスタンスの詳細
-
-#### インスタンス１
+### インスタンス１
 
 |項目|内容|
 |---|---|
@@ -25,8 +18,6 @@ Nginx Tomcat マルチインスタンス<br>テンプレート概要説明
 |イメージタイプ|CentOS 6.5 64bit (English) 05|
 |フレーバータイプ|S-1|
 |ボリュームタイプ|M1|
-
-<br>
 
 #### インストールするソフトウェア
 
@@ -34,11 +25,7 @@ Nginx Tomcat マルチインスタンス<br>テンプレート概要説明
 |---|---|---|---|
 |Nginx|1.10.1|[2-clause BSD-like license.](http://nginx.org/LICENSE)|HTTPサーバ<br>yumによるインストール|
 
-<br>
-
----
-
-#### インスタンス２
+### インスタンス２
 
 |項目|内容|
 |---|---|
@@ -46,8 +33,6 @@ Nginx Tomcat マルチインスタンス<br>テンプレート概要説明
 |イメージタイプ|CentOS 6.5 64bit (English) 05|
 |フレーバータイプ|S-1|
 |ボリュームタイプ|M1|
-
-<br>
 
 #### インストールするソフトウェア
 
@@ -56,15 +41,11 @@ Nginx Tomcat マルチインスタンス<br>テンプレート概要説明
 |Tomcat|8.5.5|[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)|Appサーバ|
 |JDK|1.8.0 102|[Oracle Binary Code License (BCL)](http://www.oracle.com/technetwork/java/javase/terms/license/index.html)|Tomcat用JDK|
 
-<br>
-
-### 作成方法
+## 作成方法
 
 [IaaSテンプレート利用ガイド](../usage.md)を参照して下さい。
 
-<br>
-
-### 作成時パラメタ
+## 作成時パラメタ
 
 |パラメタ名|入力する値の型|説明|
 |---|---|---|
@@ -80,11 +61,9 @@ Nginx Tomcat マルチインスタンス<br>テンプレート概要説明
 |tomcat_host_cidr|string|AppサーバへのSSH接続を許可するCIDRを指定|
 |flavor|string|作成するインスタンスのフレーバーを指定|
 
-<br>
+## セキュリティグループ
 
-### セキュリティグループ
-
-#### インスタンス１
+### インスタンス１
 
 |プロトコル|ingress|egress|対象IPアドレス|ポート|
 |---|---|---|---|---|
@@ -99,11 +78,7 @@ Nginx Tomcat マルチインスタンス<br>テンプレート概要説明
 |TCP       |－|●|169.254.169.254/32|HTTP |
 |PROXY(TCP)|－|●|tomcat_host_cidr  |8080 |
 
-<br>
-
----
-
-#### インスタンス２
+### インスタンス２
 
 |プロトコル|ingress|egress|対象IPアドレス|ポート|
 |---|---|---|---|---|
@@ -118,20 +93,12 @@ Nginx Tomcat マルチインスタンス<br>テンプレート概要説明
 |TCP       |－|●|169.254.169.254/32|HTTP |
 |PROXY(TCP)|●|－|nginx_host_cidr   |8080 |
 
-<br>
-
-### 出力情報
+## 出力情報
 
 両インスタンスのIPアドレスを`http://xxx.xxx.xxx.xxx`形式で出力
 
-<br>
-
-### 起動方法
+## 起動方法
 
 出力情報のインスタンス１IPアドレスにブラウザからアクセス
 
-<br>
-
-### その他
-
----
+## その他
