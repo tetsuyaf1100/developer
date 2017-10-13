@@ -30,9 +30,9 @@ MariaDBを２つのインスタンスにインストールし、クラスタ化�
 
 #### インストールするソフトウェア
 
->|ソフトウェア|バージョン|ライセンス|説明|
->|---|---|---|---|
->|MariaDB|10.1|[GNU GENERAL PUBLIC LICENSE Version 2](https://mariadb.com/kb/en/mariadb/mariadb-license/)|MariaDB|
+|ソフトウェア|バージョン|ライセンス|説明|
+|---|---|---|---|
+|MariaDB|10.1|[GNU GENERAL PUBLIC LICENSE Version 2](https://mariadb.com/kb/en/mariadb/mariadb-license/)|MariaDB|
 
 <br>
 
@@ -51,9 +51,9 @@ MariaDBを２つのインスタンスにインストールし、クラスタ化�
 
 #### インストールするソフトウェア
 
->|ソフトウェア|バージョン|ライセンス|説明|
->|---|---|---|---|
->|MariaDB|10.1|[GNU GENERAL PUBLIC LICENSE Version 2](https://mariadb.com/kb/en/mariadb/mariadb-license/)|MariaDB|
+|ソフトウェア|バージョン|ライセンス|説明|
+|---|---|---|---|
+|MariaDB|10.1|[GNU GENERAL PUBLIC LICENSE Version 2](https://mariadb.com/kb/en/mariadb/mariadb-license/)|MariaDB|
 
 <br>
 

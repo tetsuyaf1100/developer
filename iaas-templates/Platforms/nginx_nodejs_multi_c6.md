@@ -30,9 +30,9 @@ Nginx + Node.js マルチインスタンス<br>テンプレート概要説明
 
 #### インストールするソフトウェア
 
->|ソフトウェア|バージョン|ライセンス|説明|
->|---|---|---|---|
->|Nginx|1.10.1|[2-clause BSD-like license.](http://nginx.org/LICENSE)|HTTPサーバ<br>yumによるインストール|
+|ソフトウェア|バージョン|ライセンス|説明|
+|---|---|---|---|
+|Nginx|1.10.1|[2-clause BSD-like license.](http://nginx.org/LICENSE)|HTTPサーバ<br>yumによるインストール|
 
 <br>
 
@@ -51,9 +51,9 @@ Nginx + Node.js マルチインスタンス<br>テンプレート概要説明
 
 #### インストールするソフトウェア
 
->|ソフトウェア|バージョン|ライセンス|説明|
->|---|---|---|---|
->|Node.js|4系|[MIT License](https://opensource.org/licenses/mit-license.php)|サーバーサイドJavaScript環境|
+|ソフトウェア|バージョン|ライセンス|説明|
+|---|---|---|---|
+|Node.js|4系|[MIT License](https://opensource.org/licenses/mit-license.php)|サーバーサイドJavaScript環境|
 
 <br>
 
