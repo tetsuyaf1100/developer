@@ -4,5 +4,6 @@ rvm:
 sudo: false
 install: gem install jekyll github-pages mdl html-proofer
 script:
+  - mdl --rules ~MD013,~MD024,~MD033 iaas-templates
   - mdl docs
   - bundle exec jekyll build --source docs && htmlproofer _site
