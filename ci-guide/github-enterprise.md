@@ -1,6 +1,6 @@
-## 第3章　GitHub Enterprise環境構築
+# 第3章　GitHub Enterprise環境構築
 
-### 3-1.GitHub Enterprise 導入手順
+## 3-1. GitHub Enterprise 導入手順
 
 FUJITSU Cloud Service K5では、分散型のバージョン管理システム Git の
 ウェブサービス[「 GitHub Enterprise 」](http://jp.fujitsu.com/solutions/cloud/k5/function/paas/github/)がご利用いただけます。<br/>
@@ -14,7 +14,7 @@ FUJITSU Cloud Service K5では、分散型のバージョン管理システム G
 
 -------------------------------------------------------------------------------------------------------------------
 
-#### リポジトリ作成方法<a name="repository"></a><br/>
+## リポジトリ作成方法
 
 1.リモートリポジトリの作成
 
@@ -85,7 +85,7 @@ Password for 'https://ユーザ名@github.com': ここにパスワード入力
 
 　<br>
 
-### 3-2.PullRequestとMerge<a name="git_function"></a><br/>
+## 3-2. PullRequestとMerge
 
 「 GitHub Enterprise 」による資産管理を行う上で欠かせない機能が「PullRequest」と「Merge」です。<br/>
 
@@ -101,7 +101,7 @@ Password for 'https://ユーザ名@github.com': ここにパスワード入力
 
 -----------------------------------------------------------------------------------------------------
 
-#### ■ Pullrequest<br>
+### ■ Pullrequest
 
 Pullrequestは分散型のバージョン管理システム GitHub の最も特徴的な機能です。<br/>
 複数人が参加するチーム開発において資産管理をGithubで行った場合、各開発担当者は各自のローカルリポジトリで作業を行うことになりますが、
@@ -177,7 +177,7 @@ git push -u origin sample-branch
 　<br/>
 
 
-#### ■ Merge <a name="merge"></a><br/>
+### ■ Merge
 
 「Pull request」でレビュー依頼を受けた開発責任者は、レビューを実施後、問題なければ「master」ブランチとプルリクエストのブランチ「sample-branch」を「merge」し、
 開発資産の統合をはかります。<br/>

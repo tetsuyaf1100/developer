@@ -1,4 +1,4 @@
-## 第2章　CIサーバ環境構築
+# 第2章　CIサーバ環境構築
 
 本章では、前章で導入した仮想サーバ（CentOS 7）へCI（継続的インテグレーション）ツールとして [「 Jenkins 」](https://jenkins.io/ )と、
 コンテンツ作成ツールとして静的ページジェネレータである [「 Hexo 」](https://hexo.io/)を導入し、CIサーバの構築を行います。<br>
@@ -9,9 +9,9 @@
 
 ------------------------------------------------------------------------------------------------------
 
-### 2-1. Jenkins導入手順
+## 2-1. Jenkins導入手順
 
-#### Jenkinsのインストール<br/>
+### Jenkinsのインストール<br/>
 
 CIツール 「 Jenkins 」 を仮想サーバ(CentOS 7)へ導入します。<br/>
 [「 Jenkins 」](https://jenkins.io/)の公式サイトから「Red Hat/Fedora/CentOS」パッケージのJenkinsをインストールします。<br/>
@@ -131,7 +131,7 @@ chkconfig jenkins on
   ![Jenkins08](./image/jenkins_opening.jpg)
 　<br/>
 
-#### 仮想サーバのJenkinsユーザについて<br/>
+### 仮想サーバのJenkinsユーザについて<br/>
 
 インストールすると自動的に jenkins グループと jenkins ユーザが作成されます。
 
@@ -208,7 +208,7 @@ root
 
 　<br/>
 
-### 2-2. Jenkinsの操作画面について
+## 2-2. Jenkinsの操作画面について
 
 **ジョブ作成手順**<a name="job"></a><br/>
 
@@ -421,7 +421,7 @@ Default Recipients              | 送信先メールアドレス
 
 　<br/>
 
-### 2-3. Hexo導入手順<a name="hexo"></a><br/>
+## 2-3. Hexo導入手順<a name="hexo"></a><br/>
 
  本ガイドでは、静的ページジェネレータ [「 Hexo 」](https://hexo.io/)を利用した開発を想定しています。
 

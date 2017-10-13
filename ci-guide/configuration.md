@@ -1,4 +1,4 @@
-## 第4章 JenkinsとGitHub Enterpriseの連携
+# 第4章 JenkinsとGitHub Enterpriseの連携
 
 本ガイドでは構成管理ツール 「GitHub Enterprise」とCIツール「Jenkins」を連携させることによってCI環境を構築していきます。<br/>
 「GitHub Enterprise」と「Jenkins」の連携に必要な設定として「WebHookの設定」と「SSHの設定」を行います。
@@ -9,7 +9,7 @@
 --------------------------------------------------------------------------------------------------------------------------------
 　<br/>
 
-### 4-1.GitHub EnterpriseのJenkinsへのトリガー
+## 4-1.GitHub EnterpriseのJenkinsへのトリガー
 
 本ガイドでは「 GitHub Enterprise 」のリポジトリに行われた「PullRequest」と「Merge」をトリガーとしてJenkinsのジョブを実行させます。<br/>
 Jenkinsでは「PullRequest」で起動するジョブと「Merge」で起動するジョブを用意し、
@@ -17,9 +17,7 @@ Jenkinsでは「PullRequest」で起動するジョブと「Merge」で起動す
 具体的なジョブは第7章で作成します。<br/>
 ここではJenkinsの起動に「PullRequest」と「Merge」をトリガーとして利用することを押さえて下さい。<br/>
 
-
-
-### 4-2. WebHookの設定 <a name="webhook"></a><br/>
+## 4-2. WebHookの設定 <a name="webhook"></a><br/>
 
 WebhookとはPushやPullRequestなどのイベントによりGitHub Enterpriseのリポジトリに変化があったことを連携するURLへ通知する機能です。<br/>
 Payloadというパラメータでイベントに関する詳細情報を渡すことができます。<br/>
@@ -145,7 +143,7 @@ Payload URL 設定
 
 　<br/>
 
-### 4-3. SSHの設定 <a name="SSH"></a><br/>
+## 4-3. SSHの設定 <a name="SSH"></a><br/>
 
 JenkinsとGitHub Enterpriseを接続するために必要な設定です。<br/>
 ※ここでは、JenkinsにSSH接続するために必要な秘密鍵と公開鍵が作成されていることを前提としています。<br/>

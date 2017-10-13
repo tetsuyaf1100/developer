@@ -1,4 +1,4 @@
-## 第6章 テストツールの導入<a name="testtool"></a><br/>
+# 第6章 テストツールの導入
 
 本ガイドの開発テストで使用するテストツールの導入手順と実行コマンドを示します。<br/>
 テストツールは仮想サーバ（CentOS 7）へ導入します。<br/>
@@ -6,9 +6,9 @@
 
 -----------------------------------------------------------------------------------------------
 
-### 6-1.各種テストツール導入と実行コマンド
+## 6-1.各種テストツール導入と実行コマンド
 
-#### Markdown ファイル構文チェックツール
+### Markdown ファイル構文チェックツール
 
 参考：[ Markdownlint ](https://github.com/mivok/markdownlint)<br/>
 Markdownlint は ruby 形式のため ruby の導入が必要です。<br/>
@@ -36,7 +36,7 @@ $ rbenv versions
 $ rbenv global 2.4.2
 ```
 
-#### Markdownlintの導入手順
+### Markdownlintの導入手順
 
 ```
 #gemはrubyと一緒に導入されたパッケージ管理ツールです。
@@ -49,7 +49,7 @@ $ rake install
 $ mdl < Markdown ファイル>
 ```
 
-#### html 構文チェックツール
+### html 構文チェックツール
 
 参考：[ HTMLHint ](http://htmlhint.com/)
 導入の前提としてnodeのバージョンがv0.11.15以上必要です。
@@ -73,7 +73,7 @@ $ cat <チェックするファイル.html> | htmlhint stdin
 $ htmlhint
 ```
 
-#### アタックテスト（脆弱性検査）ツール
+### アタックテスト（脆弱性検査）ツール
 
 参考：[ Skipfish ](https://code.google.com/archive/p/skipfish/wikis/SkipfishDoc.wiki)
 Skipfish は Google が開発した脆弱性検査ツールで、CUI 環境での利用になります。
