@@ -1,11 +1,14 @@
 # K5 IaaS Heat テンプレート集
 
+[\[利用方法\]](usage.md)
+
 ## アプリケーション系
 
 ### CentOS 6 ベース
+
 | テンプレート概要 | テンプレートファイル |
 | :--------------- | :------------------- |
-| インスタンスを作成し、Activitiをインストールします。TomcatをPROXYサーバとしてインストールします。[[詳細へ]](Applications/activiti_single_c6.md) | [activiti_single_c6.yaml](Applications/activiti_single_c6.yaml)	|
+| インスタンスを作成し、Activitiをインストールします。TomcatをPROXYサーバとしてインストールします。[[詳細へ]](Applications/activiti_single_c6.md) | [activiti_single_c6.yaml](Applications/activiti_single_c6.yaml) |
 | インスタンスを作成し、Aipoをインストールします。 [[詳細へ]](Applications/aipo_single_c6.md) | [aipo_single_c6.yaml](Applications/aipo_single_c6.yaml) |
 | インスタンスを作成し、Beats（Topbeat、Filebeat、Packetbeatの3種）をインストールします。検索、解析用にElasticsearch、データの可視化用にKibanaをインストールします。[[詳細へ]](Applications/beats_single_c6.md) | [beats_single_c6.yaml](Applications/beats_single_c6.yaml) |
 | インスタンスを2つ用意し、インスタンス1にはDrupal、Apache、MariaDBクライアントを、インスタンス2にはMariaDBサーバをインストールします。両サーバ間を連携させます。[[詳細へ]](Applications/drupal_apache_mariadb_multi_c6.md) | [drupal_apache_mariadb_multi_c6.yaml](Applications/drupal_apache_mariadb_multi_c6.yaml) |
@@ -25,6 +28,7 @@
 ## プラットフォーム系
 
 ### CentOS 6 ベース
+
 | テンプレート概要 | テンプレートファイル |
 | :--------------- | :------------------- |
 | インスタンスを2つ用意します。それぞれにWebサーバ（Apache）とNode.jsをインストールし、両サーバ間を連携させます。Node.js上で機能する簡易Appサーバを配置します。[[詳細へ]](Platforms/MultiServer/apache_nodejs_multi_c6.md) | [apache_nodejs_multi_c6.yaml](Platforms/MultiServer/apache_nodejs_multi_c6.yaml) |
