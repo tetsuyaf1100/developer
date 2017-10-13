@@ -333,24 +333,28 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
      JMeterの基本機能(BeanShellサンプラー)を使用して、第ニ引数以降に指定した変数を、第一 引数に指定した変数に(JSON文字列として)格納するスクリプト(add\_variables\_to\_json\_string.bsh)を呼び出します。
      ![keypairのJSONを作成](images/keypairs/keypair-json.jpg)
      ここで変数「keypair」に格納されるJSON文字列は以下になります。
+
      ```
      {
        "name": "[指定したキーペア名]",
        "availability_zone": "[指定したAZ]"
      }
      ```
+
   1. リクエストボディのJSONを作成
-      「keypairのJSONを作成」と同様にスクリプトを呼び出します。
-      ![リクエストボディのJSONを作成](images/keypairs/request-json.jpg)
-      ここで変数「request\_body」に格納されるJSON文字列は以下になります。
-      ```
-      {
-        "keypair":{
-          "name": "[指定したキーペア名]",
-          "availability_zone": "[指定したAZ]"
-        }
-      }
-      ```
+     「keypairのJSONを作成」と同様にスクリプトを呼び出します。
+     ![リクエストボディのJSONを作成](images/keypairs/request-json.jpg)
+     ここで変数「request\_body」に格納されるJSON文字列は以下になります。
+
+     ```
+     {
+       "keypair":{
+         "name": "[指定したキーペア名]",
+         "availability_zone": "[指定したAZ]"
+       }
+     }
+     ```
+
   1. キーペア作成リクエスト
      JMeterのHTTPリクエスト機能を使用してkeypairsリクエストを行います。
      リクエストボディには作成した「request\_body」を使用します。
@@ -362,6 +366,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
       JMeterの基本機能(BeanShellサンプラー)を使用して、指定した変数の内容を中身を指定した ファイルに出力するスクリプト(variable\_to\_file.bsh)を呼び出します。
       ![秘密鍵ファイル出力](images/keypairs/secret-key-file.jpg)
       作成される秘密鍵の内容は以下のようになります。
+
       ```
       -----BEGIN RSA PRIVATE KEY-----
       ・・・鍵の文字列・・・
@@ -543,6 +548,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
      {resource\_name}にはHeatテンプレートで定義したリソース名を指定する必要があります。
      ここで言うリソース名とは、K5上で表示される名前の事ではありません。
      例えば以下のようなHeatテンプレートが記述されていた場合、
+
      ```
      ・・・(省略)・・・
      resources:
@@ -553,6 +559,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
            availability_zone: jp-west-1a
      ・・・(省略)・・・
      ```
+
      リソース名は「resouce\_name\_on\_k5」ではなく「resouce\_name\_on\_template」です。
 
 - 実装サンプル(module/get\_stack\_resouce\_info.jmx)
@@ -780,7 +787,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
     「-subj」はサブジェクトを指定するオプションになります。
     ![証明書署名リクエスト作成](images/ssl-vpn/private-ca-keys.jpg)
 
-  2. DH鍵作成
+  1. DH鍵作成
     秘密鍵＆証明書作成の際と同様に、opensslコマンドを実行してDH鍵を作成します。
 
     **サーバ証明書・秘密鍵の作成(サーバ証明書作成.jmx)：**
@@ -874,6 +881,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
 
   鍵情報コンテナを作成します。
   ここで作成する鍵情報コンテナはSSL-VPNに必要な以下の情報を含むものです。
+
   - 「SSL-VPN用鍵情報の登録」で登録した、(独自)CA証明書のURL
   - 「SSL-VPN用鍵情報の登録」で登録した、サーバ証明書のURL
   - 「SSL-VPN用鍵情報の登録」で登録した、サーバ秘密鍵のURL
@@ -897,6 +905,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
 
   1. コンテナ作成時のリクエストボディ
      コンテナ作成のAPIのリクエストボディは以下のようなフォーマットになっています。
+
      ```
      {
        "name": "{contatiner_name}",
@@ -912,6 +921,7 @@ API の内、リソースの GET や DELETE を行なうものは、リクエス
      ```
 
      SSL-VPN用のコンテナを作成する場合は{secret\_name}において、それぞれ以下を指定する必要があります。
+
      - (独自)CA証明書：ca
      - サーバ証明書:server\_certificate
      - サーバ秘密鍵:server\_key
