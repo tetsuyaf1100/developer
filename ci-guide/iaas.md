@@ -3,6 +3,10 @@
 ### 1-1.K5 IaaS環境構築について<br/>
 本章では、K5上にCI環境を構築するための土台となるIaaS環境の構築を行います。<br/>
 
+本ガイドでは以下の図のようなシステム構成を想定しています。
+
+![System01](./image/system01.jpg)
+
 K5 IaaS環境構築 手順に関しましては、<br/>
 
 - [『FUJITSU Cloud Service K5 IaaS ドキュメント・ツール類』](https://k5-doc.jp-east-1.paas.cloud.global.fujitsu.com/doc/jp/iaas/document/list/doclist_iaas.html)<br/>
