@@ -151,9 +151,8 @@ JENKINS_HOME                         | /var/lib/jenkins
 
 **Jenkinsユーザの権限設定の方法**<br/>
 
-CI環境を構築し、導入した各種ツールをJenkinsから操作する場合、仮想OSのJenkinsユーザに権限を与える、パスを通すなどの作業が必要があります。<br/>
-しかし、むやみに権限を与えるとセキュリティ面で重大な影響を及ぼしますのでご注意ください。<br/>
-以下、参考として例を示しますが、推奨しているわけではありません。<br/>
+CI環境を構築し、導入した各種ツールをJenkinsから操作する場合、仮想OSのJenkinsユーザに権限を与える、パスを通すなどの作業が必要になります。<br/>
+本ガイドではJenkinsユーザにsudoコマンドを設定し、以下手順を進めます。
 権限やパスの設定に際しては必ず開発グループなどのセキュリティ規定を考慮し、ご判断ください。<br/>
 
 -------------------------------------------------------------------------------------------------------------------------------------
@@ -186,7 +185,7 @@ su - jenkins
 【 例 】 sudoコマンド設定<br/>
 sudoコマンドでは、あるユーザが別のユーザとしてコマンドを実行できるようになります。<br/>
 suコマンドではできなかった特定のコマンド単位で権限を制限することも可能です。<br/>
-セキュリティ面ではsuよりもsudoの方が強化されていますが、設定に際しては充分ご注意ください。<br/>
+セキュリティ面ではsuよりもsudoの方が強化されていますが、ログイン可能なユーザはroot権限を持つことになりますので、設定に際してはご注意ください。<br/>
 
 ```
 # rootより設定を行います。
@@ -435,9 +434,41 @@ Hexo を導入する仮想サーバで作業を行います。
 
 Hexo は Node で作成されているため Node.js の導入が必要となります。
 
-以下では、Node.js は導入済みとして Hexo の導入を行います。
+Node.js 導入手順
+
+```
+#node.jsのバージョン管理ツール nvm をgitから取得します。
+yum -y install git
+git clone git://github.com/creationix/nvm.git ~/.nvm
+source ~/.nvm/nvm.sh
+
+#インストール可能なnode.jsのバージョンを確認
+nvm ls-remote
+
+#node.jsの導入
+nvm install {バージョン}　※例：v0.33.4（2017.10現在 最新版）
+                         ※本ガイドでは導入の前提としてnodeのバージョンがv0.11.15以上必要です。
+
+#nodeが正しく導入されたか確認します。
+node -v
+
+#nvmの設定
+#デフォルトのバージョンを設定します。
+nvm alias default {バージョン}
+
+#nvmコマンドが実行できるように設定します。
+vi ~/.bash_profile
+
+if [[ -s ~/.nvm/nvm.sh ]];
+ then source ~/.nvm/nvm.sh
+fi
+
+```
+
+Hexo 導入手順
 
  ```
+#Node.js と一緒にインストールされたパッケージマネージャ npm を利用して hexo を導入します。
   npm install hexo-cli -g
 
 # Hexo の初期化。必要なファイル/フォルダが生成されます。
@@ -455,7 +486,7 @@ Hexo は Node で作成されているため Node.js の導入が必要となり
  ```
   INFO にある` http://localhost:4000/ ` にアクセスするとプレビューが表示されます。
 
-  （firewallの設定で4000番ポートの開放を行ってください。）
+  （プレビューの確認のためには4000番ポートを開放する必要があります。）
 
 
  以上で「 Hexo 」作業フォルダが準備できました。
@@ -508,24 +539,24 @@ Markdown 形式で記載します。
   ![Hexo](./image/hexo.jpg)
 　<br/>
 
-3.　 その他のHexoの使い方
+3.　 その他のHexoの使い方 
 
 テーマ（theme）の変更
 
->Hexoではテーマの変更も容易に行えます。<br/>
->
->以下、テーマ変更手順です。
->
->①公式サイトの[ theme ](https://hexo.io/themes/)より好きなテーマを選びます。<br/>
->②選択したテーマのタイトルのGithubページからクローンを行います。<br/>
->　Hexoを導入したディレクトリ配下の themes ディレクトリがクローン先です。<br/>
->　例：テーマ「Clean-blog」をthemesディレクトリへクローン<br/>
->　`git clone https://github.com/klugjo/hexo-theme-clean-blog.git themes/clean-blog`<br/>
->③Hexoを導入したディレクトリ配下にある「_config.yml」を修正します。<br/>
->　デフォルトでは`theme: landscape`となっている部分を`theme: テーマ名`に変更します。<br/>
->　例：`theme: clean-blog`<br/>
->
->　以上でテーマが変更できます。<br/>
+Hexoではテーマの変更も容易に行えます。<br/>
+以下、テーマ変更手順です。
+
+   1. サイトの<a href="https://hexo.io/themes/">theme</a>より好きなテーマを選びます。
+   2. 選択したテーマのタイトルのGithubページからクローンを行います。
+      - Hexoを導入したディレクトリ配下の themes ディレクトリがクローン先です。
+      - 例：テーマ「Clean-blog」をthemesディレクトリへクローン
+      - `git clone https://github.com/klugjo/hexo-theme-clean-blog.git themes/clean-blog`
+   3. Hexoを導入したディレクトリ配下にある「_config.yml」を修正します。
+      - デフォルトでは`theme: landscape`となっている部分を`theme: テーマ名`に変更します。
+      - 例：`theme: clean-blog`
+
+以上でテーマが変更できます。<br/>
+
 【参考： Hexo画面 】
 
   ![Hexoテーマの変更](./image/hexo_theme.jpg)
