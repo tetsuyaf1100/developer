@@ -105,7 +105,7 @@ Skipfish は Google が開発した脆弱性検査ツールで、CUI 環境で�
 ```bash
 #事前準備として libidn と libpcre3 が必要になります。
 $ yum install openssl-devel
-$ yum install openssl-devel
+$ yum install pcre-devel
 $ yum install libidn-devel
 
 # Skipfishをインストールします。
