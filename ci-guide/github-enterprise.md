@@ -21,22 +21,28 @@ FUJITSU Cloud Service K5では、分散型のバージョン管理システム G
 
 1.リモートリポジトリの作成
 
- 「 GitHub Enterprise 」の画面で新規のリポジトリを作成します。<br/>
- トップ画面中央の[Start a project]を押下、または右下の [New repository]を押下します。<br/>
+ 「 GitHub Enterprise 」の画面で新規のリポジトリを作成します。
+ 
+ トップ画面中央の[Start a project]を押下、または右下の [New repository]を押下します。
+ 
  ![GHE01](./image/repository_ghe.jpg)
-　<br/>
-次画面に遷移したら「Repository name」を入力し、[ Create repository ]を押下でリモートリポジトリが作成されます。<br/>
+ 
+次画面に遷移したら「Repository name」を入力し、[ Create repository ]を押下でリモートリポジトリが作成されます。
+
  ![GHE02](./image/repository_creat.jpg)
-　<br/>
-サンプルとして「Repository name」を「test-github」として作成しました。<br/>
-作成されたリモートリポジトリの初期画面です。<br/>
+
+サンプルとして「Repository name」を「test-github」として作成しました。
+
+作成されたリモートリポジトリの初期画面です。
+
 ![GHE03](./image/remote_repository.jpg)
-　<br/>
+
 
 
 2.ローカルリポジトリの作成
 
- 仮想サーバ上にローカルリポジトリを作成し、Gitリポジトリにします。<br/>
+ 仮想サーバ上にローカルリポジトリを作成し、Gitリポジトリにします。
+
  先程作成したリモートリポジトリ「test-github」を利用して作成していきます。
 
 ```
@@ -54,10 +60,11 @@ echo "# test-github" >> README.md
 git init
 
 #「 GitHub Enterprise 」の画面で作成したリモートリポジトリ情報を登録します。
-git remote add origin https://github.com/ユーザ名/test-github(リモートリポジトリ名)
+git remote add origin https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/ユーザ名/test-github(リモートリポジトリ名).git
+※注意：GitHub Enterprise のリポジトリurlのFQDN部分はご利用者ごとに異なります。
 
 （# sshで接続する場合は）
-（git remote add origin git@github.com:ユーザ名/test-github(リモートリポジトリ名）
+（git remote add origin git@git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com:ユーザ名/test-github(リモートリポジトリ名).git)
 
 # 「README.md 」のファイルをインデックスに追加
 git add README.md
@@ -69,51 +76,59 @@ git commit -m "[コミットのコメント記入]"
 git push -u origin master
 
 #「 GitHub Enterprise 」に登録したユーザー名を聞かれます。
-Username for 'https://github.com': ここにユーザ名を入力
+Username for 'https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/': 
+ここにユーザ名を入力
 
 # 続けて同じく登録したパスワードを入力します。
-Password for 'https://ユーザ名@github.com': ここにパスワード入力
+Password for 'https://ユーザ名@git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com': 
+ここにパスワード入力
 
 
 ```
 
 「 GitHub Enterprise 」画面で確認
 
-`https://github.com/ユーザ名/test-github(リポジトリ名)`
+`git remote add origin https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/ユーザ名/test-github(リモートリポジトリ名).git`
 
 ![GHE04](./image/repository_push.jpg)
-　<br/>
-動作確認用に作成した「 README.md 」が格納され、画面に「 test-github 」が表示されていれば完了です。<br/>
-以上で開発資産管理の場として「 GitHub Enterprise 」の準備ができました。<br/>
 
-　<br>
+動作確認用に作成した「 README.md 」が格納され、画面に「 test-github 」が表示されていれば完了です。
+
+以上で開発資産管理の場として「 GitHub Enterprise 」の準備ができました。
+
+
 
 ## 3-2. PullRequestとMerge
 
-「 GitHub Enterprise 」による資産管理を行う上で欠かせない機能が「PullRequest」と「Merge」です。<br/>
+「 GitHub Enterprise 」による資産管理を行う上で欠かせない機能が「PullRequest」と「Merge」です。
 
 ここではチーム開発における効率的な資産管理を実現するGithubの運用モデル「 GitHub Flow 」を意識して、
-「PullRequest」と「Merge」の基本操作を説明します。<br/>
+「PullRequest」と「Merge」の基本操作を説明します。
 
-「GitHub Flow」に関して詳しくはGitHub公式ガイドの[「 Understanding the GitHub Flow 」](https://guides.github.com/introduction/flow/)ページを参照ください。<br/>
+「GitHub Flow」に関して詳しくはGitHub公式ガイドの[「 Understanding the GitHub Flow 」](https://guides.github.com/introduction/flow/)ページを参照ください。
 
 「Github Flow」では、1つのリポジトリに「 master 」ブランチと「開発用ブランチ」の2つのブランチを切り、
 各開発者がローカルで作業したものを「開発用ブランチ」へpushし、「Pullrequest」機能でレビュー依頼をします。
-レビュー完了後、資産管理責任者が「master」ブランチへ「merge」を行ってデプロイするという流れになります。<br/>
-「Github Flow」に従ってリポジトリの運用を行うことで開発チーム内で効率的なソースレビューを行えるよう目指します。<br/>
+
+レビュー完了後、資産管理責任者が「master」ブランチへ「merge」を行ってデプロイするという流れになります。
+
+「Github Flow」に従ってリポジトリの運用を行うことで開発チーム内で効率的なソースレビューを行えるよう目指します。
 
 -----------------------------------------------------------------------------------------------------
 
 ### ■ Pullrequest
 
-Pullrequestは分散型のバージョン管理システム GitHub の最も特徴的な機能です。<br/>
-複数人が参加するチーム開発において資産管理をGithubで行った場合、各開発担当者は各自のローカルリポジトリで作業を行うことになりますが、
-各開発者がローカルリポジトリで加えた変更を他の開発者に通知する機能がPullrequestです。<br/>
+Pullrequestは分散型のバージョン管理システム GitHub の最も特徴的な機能です。
 
-**PullRequest 手順**<a name="pullreq"></a><br/>
+複数人が参加するチーム開発において資産管理を Github で行った場合、各開発担当者は各自のローカルリポジトリで作業を行うことになりますが、
+各開発者がローカルリポジトリで加えた変更を他の開発者に通知する機能が Pullrequestです。
 
-リポジトリにプルリクエスト用のブランチを作成します。<br/>
-ここでは「sample-branch」という名前でブランチを作成します。<br/>
+
+**PullRequest 手順**<a name="pullreq"></a>
+
+リポジトリにプルリクエスト用のブランチを作成します。
+
+ここでは「sample-branch」という名前でブランチを作成します。
 
 ```
 # プルリクエストを行うリポジトリへ入ります。
@@ -131,26 +146,35 @@ git branch
 git checkout <ブランチ名(sample-branch)>
 ```
 
-もし、プルリクエストを行うリポジトリが仮想サーバにまだ用意していなかった場合は「 GitHub Enterprise 」画面からクローンします。<br/>
-「 GitHub Enterprise 」画面からクローンするためのコードを取得します。<br/>
-[ Clone or download ]を押下し表示された https をコピーします。<br/>
-以下は先程作成したリモートリポジトリ「test-github」を使用した例です。<br/>
+もし、プルリクエストを行うリポジトリが仮想サーバにまだ用意していなかった場合は「 GitHub Enterprise 」画面からクローンします。
+
+「 GitHub Enterprise 」画面からクローンするためのコードを取得します。
+
+[ Clone or download ]を押下し表示された https をコピーします。
+
+以下は先程作成したリモートリポジトリ「test-github」を使用した例です。
 
 ![GHE05](./image/clone.jpg)
-　<br/>
-次に仮想サーバへ入り、以下のコマンドを入力します。<br/>
-` git clone https://github.com/ユーザ名/test-github.git`<br/>
-
-クローンが成功するとクローンしたリポジトリ名のディレクトリが作成されます。<br/>
-そのディレクトリへ入り、先程の手順でブランチを作成します。<br/>
 
 
-ブランチが用意できましたら「Pullrequest」動作確認用に作業します。<br/>
+次に仮想サーバへ入り、以下のコマンドを入力します。
 
-確認用のREADME.mdを作成します。<br/>
-`echo "# sample-branch for Pullrequest" >> README.md`<br/>
+` git clone https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/ユーザ名/test-github(リモートリポジトリ名).git`
 
-作成したMDファイルをコミットし、sample-branchブランチへプッシュします。<br/>
+
+クローンが成功するとクローンしたリポジトリ名のディレクトリが作成されます。
+
+そのディレクトリへ入り、先程の手順でブランチを作成します。
+
+
+ブランチが用意できましたら「Pullrequest」動作確認用に作業します。
+
+確認用のREADME.mdを作成します。
+
+`echo "# sample-branch for Pullrequest" >> README.md`
+
+作成したMDファイルをコミットし、sample-branchブランチへプッシュします。
+
 ```
 # 作成したMDファイルをインデックスに追加。
 git add README.md
@@ -163,75 +187,91 @@ git push -u origin sample-branch
 ```
 
 
-画面で確認します。「sample-branch」へpushされたことが分かります。<br/>
+画面で確認します。「sample-branch」へpushされたことが分かります。
 
 ![GHE06](./image/pullreq_branch.jpg)
-　<br/>
-上の画面の赤枠 [ Compare & pull request ] を押下してプルリクエストを作成します。<br/>
 
-次画面に遷移しましたら、中央のテキストボックスにメッセージを記入し、[ Create pull request ]を押下すれば、プルリクエストの完了です。<br/>
+上の画面の赤枠 [ Compare & pull request ] を押下してプルリクエストを作成します。
+
+次画面に遷移しましたら、中央のテキストボックスにメッセージを記入し、[ Create pull request ]を押下すれば、プルリクエストの完了です。
 
 ![GHE07](./image/pullreq_message.jpg)
-　<br/>
 
-遷移した画面で作成したプルリクエストの状態を確認することができます。<br/>
+
+遷移した画面で作成したプルリクエストの状態を確認することができます。
 
 ![GHE08](./image/pullreq_create.jpg)
-　<br/>
+
 
 
 ### ■ Merge
 
-「Pull request」でレビュー依頼を受けた開発責任者は、レビューを実施後、問題なければ「master」ブランチとプルリクエストのブランチ「sample-branch」を「merge」し、
-開発資産の統合をはかります。<br/>
+「Pull request」でレビュー依頼を受けた開発責任者は、レビューを実施後、問題なければ「master」ブランチと
+プルリクエストのブランチ「sample-branch」を「merge」し、開発資産の統合をはかります。
 
-**Merge 手順**<br/>
+**Merge 手順**
 
 まずは、各ブランチの差異を確認します。<br/>
-「Pull requests」のページの [ Files changed ] タブを押下し、コミット内容をレビューします。<br/>
-確認用に作成した「README.md」ファイルの状況が画面中央に表示されます。<br/>
+「Pull requests」のページの [ Files changed ] タブを押下し、コミット内容をレビューします。
+
+確認用に作成した「README.md」ファイルの状況が画面中央に表示されます。
 
 ![GHE09](./image/pullreq_fileChange.jpg)
-　<br/>
+
 レビューが終わりましたら [ Conversation ] タブを押下し、メッセージを記入し、[ Comment ] を押下します。
 
 ![GHE10](./image/merge_message.jpg)
-　<br/>
+
 レビュー完了しましたので、[ Merge pull request ]を押下し「 merge 」します。
 
 ![GHE11](./image/merge.jpg)
-　<br/>
 
- GitHub では「 Pull request」の「 merge 」の方法が画面から選択できるようになりました。<br/>
- [ Merge pull request ]ボタンをプルダウンしますと、3つの「 merge 」方法が選択できます。<br/>
+
+ GitHub では「 Pull request」の「 merge 」の方法が画面から選択できるようになりました。
+ 
+ [ Merge pull request ]ボタンをプルダウンしますと、3つの「 merge 」方法が選択できます。
 
  ![GHE12](./image/merge_3patterns.jpg)
-　<br/>
 
-> [ Create a merge commit ]<br/>
-> All commits from this branch will be added to the base branch via a merge commit.<br/>
-> デフォルトの「 merge 」方法です。<br/>
-> プルリクエストしたブランチに存在するすべてのコミットはマージコミットを経てベースブランチ（本ガイドではmasterブランチ）へ統合されます。<br/>
+
+> [ Create a merge commit ]
 >
-> [ Squash and merge ]<br/>
-> The 1 commit from this branch will be added to the base branch.<br/>
-> プルリクエスしたブランチに複数のコミットがあった場合、それらを１つにまとめて１つのコミットとしてmasterブランチへ統合します。<br/>
-> プルリクエストの複数のコミットの履歴はmasterには反映されず、１つのコミットとして扱われます。<br/>
-> 細かな修正や追加で大量のコミットが発生した場合にそれらを1回のコミットとして扱うようなイメージです。<br/>
+> All commits from this branch will be added to the base branch via a merge commit.
 >
-> [ Rebase and merge ]<br/>
-> The 1 commit from this branch will be rebased and added to the base branch.<br/>
-> プルリクエストしたブランチに存在するコミットをリベースして１つ１つ履歴を残してmasterブランチへ統合します。<br/>
-> 分岐した作業履歴を分かりやすく一直線の作業履歴に変えるイメージです。<br/>
+> デフォルトの「 merge 」方法です。
+>
+> プルリクエストしたブランチに存在するすべてのコミットはマージコミットを経てベースブランチ（本ガイドではmasterブランチ）へ統合されます。
 
-詳しくは公式サイトの[ 「 About pull request merges 」](https://help.github.com/articles/about-pull-request-merges/)を参照ください。<br/>
 
-[ Merge pull request ] を押下すると、最終確認のため [ Confirm ] ボタンが出現します。それを押すとmerge実行です。<br/>
+> [ Squash and merge ]
+>
+> The 1 commit from this branch will be added to the base branch.
+>
+> プルリクエスしたブランチに複数のコミットがあった場合、それらを１つにまとめて１つのコミットとしてmasterブランチへ統合します。
+>
+> プルリクエストの複数のコミットの履歴はmasterには反映されず、１つのコミットとして扱われます。
+>
+> 細かな修正や追加で大量のコミットが発生した場合にそれらを1回のコミットとして扱うようなイメージです。
+
+
+> [ Rebase and merge ]
+>
+> The 1 commit from this branch will be rebased and added to the base branch.
+>
+> プルリクエストしたブランチに存在するコミットをリベースして１つ１つ履歴を残してmasterブランチへ統合します。
+>
+> 分岐した作業履歴を分かりやすく一直線の作業履歴に変えるイメージです。
+>
+
+詳しくは公式サイトの[ 「 About pull request merges 」](https://help.github.com/articles/about-pull-request-merges/)を参照ください。
+
+[ Merge pull request ] を押下すると、最終確認のため [ Confirm ] ボタンが出現します。それを押すとmerge実行です。
 
  ![GHE13](./image/merge_success.jpg)
-　<br/>
-上図赤枠「 Pull request successfully merged and closed 」とプルリクエストのマージが成功したことのメッセージが出現すれば完了です。<br/>
-また、同じく赤枠の[Delete branch]を押下すると「 Pull request」で使用したブランチを削除することができます。<br/>
+
+上図赤枠「 Pull request successfully merged and closed 」とプルリクエストのマージが成功したことのメッセージが出現すれば完了です。
+
+また、同じく赤枠の[Delete branch]を押下すると「 Pull request」で使用したブランチを削除することができます。
 
 以上を踏まえて、開発チーム内で「 Pull request 」 と「 merge 」を 効果的に行ってください。
 
