@@ -8,12 +8,15 @@
 ### Jenkinsのインストール
 
 CIツール 「 Jenkins 」 を仮想サーバ(CentOS 7)へ導入します。
+
 [「 Jenkins 」](https://jenkins.io/)の公式サイトから「Red Hat/Fedora/CentOS」パッケージのJenkinsをインストールします。
+
 以下の手順はrootユーザで操作します。
 
 #### JDKの導入
 
 JenkinsはJavaで実装されているためJDKを導入します。
+
 最新バージョンの Jenkins では Java7 以上が必要です。
 
 ```
@@ -38,6 +41,7 @@ yum install java-1.8.0-openjdk java-1.8.0-openjdk-devel
 #### 使用ポート変更
 
 Jenkinsはデフォルトで8080ポートを使用します。
+
 ポートを変更する場合は次の設定を行います。
 
 ```
@@ -72,13 +76,16 @@ chkconfig jenkins on
 
 #### WebブラウザでJenkinsの起動確認
 
-`http://<仮想マシンのFQDNまたはIPアドレス>:<設定したポート番号>`
+`http://{仮想サーバのIPアドレス}:{設定したポート番号}`
+
+`例）http://192.168.1.13:8080`
 
 
 【 図１ Jenkins初期画面 】
   ![Jenkins](./image/jenkins.jpg)
 
 初回起動時は管理者が起動していることを確認するため、管理者パスワード「Administrator password」の入力を求められます。（ 図１赤枠部分 ）
+
 管理者パスワード「Administrator password」は、Jenkinsをインストールした仮想サーバで確認できます。
 
 `cat /var/lib/jenkins/secrets/initialAdminPassword`
@@ -89,42 +96,60 @@ chkconfig jenkins on
 しかしProxyサーバが設置されている環境では「図2 Offline」画面が表示されます。
 
 【 図2 Offline画面 】
+
   ![Jenkins02](./image/jenkins_offline.jpg)
 
 「Configure Proxy」をクリックし、図3の画面でProxyサーバのIPアドレス・ポートなどを順に入力し、「Save and Continue」を押下します。
+
 【 図3 Jenkins Proxy画面 】
+
   ![Jenkins03](./image/jenkins_proxy.jpg)
 
 次に「図4 Customize Jenkins」画面が表示されます。
+
 ここでは Jenkinsを拡張・カスタマイズするプラグインのインストールが選択できます。
+
 2つ選択肢が提示されますのでお選びください。
 
 - 「Install suggested plugins」（推奨プラグインの一括インストール）
 - 「Select plugins to install」（プラグインを選択してインストール）
 
 選択してインストールしたいプラグインがなければ、「Install suggested plugins」（推奨プラグインの一括インストール）を選択します。
+
 【 図4 Customize Jenkins画面 】
+
   ![Jenkins04](./image/jenkins_plugin.jpg)
 
 「Install suggested plugins」を押下しましたら以下のように自動的にプラグインがインストールされます。
+
 【 図5 Plugin Install画面 】
+
   ![Jenkins05](./image/jenkins_pluginInstall.jpg)
 
 プラグインのインストールが完了すると、「図5 管理者ユーザーアカウント設定画面」が表示されます。
+
 【 図6 管理者ユーザーアカウント設定画面 】
+
   ![Jenkins06](./image/jenkins_user.jpg)
 
 必要な項目を入力して［ Save and Finish ］ボタンを押します。
+
 [ Continue as admin ]を選択した場合は、
+
 管理者アカウントのユーザー名は"admin"、
+
 パスワードは初回起動時に入力したものになります。
 
 初期設定が問題なく準備できましたら「図6 準備完了画面」が表示されます。
+
 【 図7 準備完了画面 】
+
   ![Jenkins07](./image/jenkins_ready.jpg)
 
 [ Start Using Jenkins ] ボタンを押下することで「Jenkinsオープニング画面」に移動し、Jenkinsが利用可能になります。
+
 【 図8 Jenkinsオープニング画面 】
+
   ![Jenkins08](./image/jenkins_opening.jpg)
 
 ### 仮想サーバのJenkinsユーザについて
@@ -145,7 +170,9 @@ JENKINS_HOME                         | /var/lib/jenkins
 **Jenkinsユーザの権限設定の方法**
 
 CI環境を構築し、導入した各種ツールをJenkinsから操作する場合、仮想OSのJenkinsユーザに権限を与える、パスを通すなどの作業が必要になります。
+
 本ガイドではJenkinsユーザにsudoコマンドを設定し、以下手順を進めます。
+
 権限やパスの設定に際しては必ず開発グループなどのセキュリティ規定を考慮し、ご判断ください。
 
 -------------------------------------------------------------------------------------------------------------------------------------
@@ -157,6 +184,7 @@ Jenkins ユーザのログインシェルはデフォルトでは/bin/false に�
 ここを変更することによってsuコマンドでJenkinsユーザへの切り替えが可能になります。
 
 suコマンドでは「su rootを実行できるユーザ間でrootのパスワードを共有することになる」
+
 「su実行後のコマンドの実行履歴がログに残らない」などセキュリティ面に懸念がありますのでご注意ください。
 
 ```
@@ -208,38 +236,55 @@ root
 ```
 以上でsudoコマンドが利用可能になり、Jenkinsユーザからroot権限が必要なコマンドが実行できるようになります。
 
+sudoでのPATHの引継ぎは `/etc/sudoers` の設定を`visudo`コマンドで変更してください。
+
+
+
 ## 2-2. Jenkinsの操作画面について
 
 **ジョブ作成手順**
 
-Jenkins上で実行される処理を「ジョブ」と呼びます。Jenkinsを利用してCI環境を構築するには各種テストやデプロイなどの「ジョブ」を作成していきます。
+Jenkins上で実行される処理を「ジョブ」と呼びます。
+Jenkinsを利用してCI環境を構築するには各種テストやデプロイなどの「ジョブ」を作成していきます。
 
 ここでは基本的な操作のみを紹介します。具体的なジョブの制作例は第7章で紹介します。
 
 「test-job」という名称のジョブを作成します。
 
 1. トップページ [ 新規ジョブ作成 ] 押下
+
   ![Jenkins09](./image/newJob_jenkins.jpg)
 
 2. 「Enter an item name」欄にジョブ名「test-job」を入力し、「フリースタイルプロジェクトのビルド」を選択。
+
 ![Jenkins10](./image/freeStyle_jenkins.jpg)
 
 3. 「設定画面」に遷移したら「ビルド」の「ビルド手順の追加」から「シェルの実行」を選択。
+
 ![Jenkins11](./image/build_jenkins.jpg)
 
 4. 実施したい処理のシェルスクリプトを記述します。
+
 ここではコンソール画面に「Hello! Mr. Jenkins!」と表示する処理を記述します。
+
 「保存」ボタンを押下すればジョブの完成です。
+
 ![Jenkins12](./image/sh_jenkins.jpg)
 
 5. 完成したジョブ「test-job」を実行します。
+
 「ビルド実行」を押下すると「ビルド履歴」が表示されます。
+
 ビルドが成功していれば青い丸とともに履歴が表示されます。
+
 ![Jenkins13](./image/exe_jenkins.jpg)
 
 6. 確認のためコンソール画面を表示します。
+
 先程の「ビルド履歴」から確認したいビルドの「# 番号」を選び、押下します。
+
 左側のメニューの「コンソール出力」を押下すれば表示されます。
+
 ![Jenkins14](./image/console_jenkins.jpg)
 
 以上がジョブ作成の基本です。
@@ -264,15 +309,19 @@ Jenkinsを利用してビルド→テスト→デプロイなどの流れを自�
 手順
 
 [ 新規ジョブの作成 ] → [ パイプライン ]を選択
+
 ![Jenkins15](./image/pipeline01_jenkins.jpg)
 
 ジョブの詳細設定画面でPipelineエリアにスクリプト記述します。
+
 【Pipeline設定画面】
+
 ![Jenkins16](./image/pipeline02_jenkins.jpg)
 
 スクリプト記述の基本形
 
    Pipelineでは、ステージごとに処理（ステップ）を分け、それらを段階的に実行することが可能です。
+   
    その基本的なスクリプトの記述例が以下になります。
 
   ```
@@ -291,11 +340,15 @@ Jenkinsを利用してビルド→テスト→デプロイなどの流れを自�
   ```
 
 また、Pipeline設定画面の下部にある「Pipeline Syntax」を押下するとサンプルコードやリファレンスを参照することができます。
+
 Jenkinsの公式サイトに[ Pipeline Steps Reference ](https://jenkins.io/doc/pipeline/steps/)が掲載されていますのでご参考ください。
+
 ![Jenkins17](./image/pipelineSyntax.jpg)
 
 基本的なPipelineを作成して実行します。
+
 Pipeline名は「test-pipeline」とします。
+
 実行する処理は Stage01で「 Hello! Mr.Jenkins.」、Stage02で「 Bye! Mr.Jenkins.」とコンソールに出力します。
 
 ```
@@ -327,6 +380,7 @@ Jenkins ではプラグインにより機能を拡張することが出来るの
 `トップ画面の「Jenkinsの管理」→「プラグインの管理」→「利用可能」から 利用したいプラグインを選択 `
 
 ※Jenkins のプラグインには、特定のプラグインを利用するために他のプラグインを導入する必要がある場合があります。プラグインの依存関係に注意してください。
+
 ![Jenkins19](./image/plugin_jenkins.jpg)
 
 本ガイドで必要となるプラグイン
@@ -344,13 +398,16 @@ Jenkins ではプラグインにより機能を拡張することが出来るの
 初期画面ではAから始まる名称のプラグインの一覧が表示されます。
 
 画面右上の[ フィルター ]欄に検索したいプラグイン名を記入し検索することも可能です。
+
 ![Jenkins20](./image/plugin_check.jpg)
 
 **メール機能**
 
 Jenkinsではビルドの実行結果をメールで通知することができます。
+
 基本的な「E-mail 通知」機能では、ビルド失敗時にのみメールが送信される設定ですが、
 メール機能を拡張するプラグイン「Email Extension Plugin」を導入すれば、「拡張E-mail通知」の設定が可能になります。
+
 ビルド失敗時だけでなく成功時にもメールを送信することができ、ビルドの実行状況に応じて送信内容を変更するなどのカスタマイズが可能になります。
 
 **基本的なメール設定**
@@ -358,7 +415,9 @@ Jenkinsではビルドの実行結果をメールで通知することができ�
 SMTPメールサーバーの設定
 
 `トップ画面「Jenkinsの管理」→「システムの設定」→「E-mail 通知」`
+
 SMTPサーバーが用意できない場合は Gmail のSMTPサーバが利用できます。
+
 以下は Gmail のSMTPサーバを利用した設定です。
 
 設定項目                  | 設定値
@@ -389,7 +448,9 @@ SMTPポート                |   465(SMTP over SSL) または 587(SMTP TLS/START
 **拡張E-mail通知の設定**
 
 設定場所は `トップ画面「Jenkinsの管理」→「システムの設定」→「拡張E-mail 通知」`
+
 「拡張E-mail通知」では様々な設定が可能であり、設定項目も数多く用意されています。
+
 本ガイドでは、最低限必要な項目の紹介のみ行います。
 
 設定項目                        | 設定する内容
@@ -402,6 +463,7 @@ Default Recipients              | 送信先メールアドレス
 デフォルトコンテンツ            | デフォルトのメールの本文を設定
 
 以下は Gmail のSMTPサーバを利用した設定です。
+
 【拡張E-mail通知 設定例 画像】
 
 ![拡張E-mail](./image/mail01.jpg)
@@ -425,6 +487,8 @@ Default Recipients              | 送信先メールアドレス
 ジョブでの設定内容はシステムの設定で行ったものとほぼ同じです。また、システムで設定した項目を引き継ぐことも、あるいは個別に変更することも可能です。
 
 参考例は第7章でご紹介します。
+
+
 
 ## 2-3. Hexo導入手順
 
@@ -482,7 +546,6 @@ Hexo 導入手順
 
 # Hexo の初期化。必要なファイル/フォルダが生成されます。
   hexo init [ Hexo作業用ディレクトリ名 ]
-
   cd [ ディレクトリ名 ]
 
 # npm モジュールをインストールします。
@@ -552,6 +615,7 @@ Markdown 形式で記載します。
 テーマ（theme）の変更
 
 Hexoではテーマの変更も容易に行えます。
+
 以下、テーマ変更手順です。
 
    1. サイトの<a href="https://hexo.io/themes/">theme</a>より好きなテーマを選びます。
