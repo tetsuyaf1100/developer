@@ -96,13 +96,13 @@ Httpの場合では、Jenkinsのデフォルトポートは tcp8080、GitHub Ent
 
 K5が提供するCentOS 7 のイメージには、デフォルトでfirewalldが導入されていません。
 
-firewalldを root ディレクトリで導入してください。
+firewalld を導入してください。
 
 ```
-#ファイアウォールインストール
+#firewalldインストール
 yum -y install firewalld
 
-#ファイアウォール起動
+#firewalld起動
 systemctl start firewalld
 
 #firewalld自動起動設定
@@ -115,7 +115,7 @@ systemctl status firewalld
 
 2. ポートフォワーディングの設定
 
-導入したfirewalldを利用して、ポートフォワーディングの設定を行います。
+導入した firewalld を利用して、ポートフォワーディングの設定を行います。
 
 以下、tcp 80番ポートで受け取った通信を、tcp 8080番ポートへ転送する設定です。
 
@@ -126,7 +126,7 @@ firewall-cmd --permanent --add-forward-port="port=80:proto=tcp:toport=8080"
 # リロード
 firewall-cmd --reload
 
-# ファイアウォールの設定確認
+# firewalld の設定確認
 firewall-cmd --list-all
 ※「forward-ports: 」の項目にポートファワーディングの設定内容が表示されます。
 例）forward-ports: port=80:proto=tcp:toport=8080:toaddr=
