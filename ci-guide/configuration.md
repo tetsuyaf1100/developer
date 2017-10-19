@@ -76,6 +76,8 @@ Jenkins の管理＞ グローバルセキュリティの設定＞ CSRF Protecti
 □ CSRF 対策 　←ここのチェックを外します。
 ```
 
+> ![グローバルセキュリティの設定](./image/CSRF.jpg)
+
 ### Jenkins （仮想サーバ）での設定
 
 Jenkins を導入したK5上の仮想サーバ(CentOS 7)での作業になります。
