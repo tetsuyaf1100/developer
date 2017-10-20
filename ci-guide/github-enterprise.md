@@ -98,35 +98,35 @@ Password for 'https://ユーザ名@git-dXXXXrbo.jp-east-1.paas.cloud.global.fuji
 
 
 
-## 3-2. PullRequestとMerge
+## 3-2. Pull requestとMerge
 
-「 GitHub Enterprise 」による資産管理を行う上で欠かせない機能が「PullRequest」と「Merge」です。
+「 GitHub Enterprise 」による資産管理を行う上で欠かせない機能が「Pull request」と「Merge」です。
 
 ここではチーム開発における効率的な資産管理を実現するGithubの運用モデル「 GitHub Flow 」を意識して、
-「PullRequest」と「Merge」の基本操作を説明します。
+「Pull request」と「Merge」の基本操作を説明します。
 
 「GitHub Flow」に関して詳しくはGitHub公式ガイドの[「 Understanding the GitHub Flow 」](https://guides.github.com/introduction/flow/)ページを参照ください。
 
 「Github Flow」では、1つのリポジトリに「 master 」ブランチと「開発用ブランチ」の2つのブランチを切り、
-各開発者がローカルで作業したものを「開発用ブランチ」へpushし、「Pullrequest」機能でレビュー依頼をします。
+各開発者がローカルで作業したものを「開発用ブランチ」へpushし、「Pull request」機能でレビュー依頼をします。
 
-レビュー完了後、資産管理責任者が「master」ブランチへ「merge」を行ってデプロイするという流れになります。
+レビュー完了後、資産管理責任者が「master」ブランチへ「Merge」を行ってデプロイするという流れになります。
 
 「Github Flow」に従ってリポジトリの運用を行うことで開発チーム内で効率的なソースレビューを行えるよう目指します。
 
 -----------------------------------------------------------------------------------------------------
 
-### ■ Pullrequest
+### ■ Pull request
 
-Pullrequestは分散型のバージョン管理システム GitHub の最も特徴的な機能です。
+Pull requestは分散型のバージョン管理システム GitHub の最も特徴的な機能です。
 
 複数人が参加するチーム開発において資産管理を Github で行った場合、各開発担当者は各自のローカルリポジトリで作業を行うことになりますが、
-各開発者がローカルリポジトリで加えた変更を他の開発者に通知する機能が Pullrequestです。
+各開発者がローカルリポジトリで加えた変更を他の開発者に通知する機能が Pull requestです。
 
 
-**PullRequest 手順**<a name="pullreq"></a>
+**Pull request 手順**<a name="pullreq"></a>
 
-リポジトリにプルリクエスト用のブランチを作成します。
+リポジトリにPull request用のブランチを作成します。
 
 ここでは「sample-branch」という名前でブランチを作成します。
 
@@ -146,7 +146,7 @@ git branch
 git checkout <ブランチ名(sample-branch)>
 ```
 
-もし、プルリクエストを行うリポジトリが仮想サーバにまだ用意していなかった場合は「 GitHub Enterprise 」画面からクローンします。
+もし、Pull requestを行うリポジトリが仮想サーバにまだ用意していなかった場合は「 GitHub Enterprise 」画面からクローンします。
 
 「 GitHub Enterprise 」画面からクローンするためのコードを取得します。
 
@@ -167,7 +167,7 @@ git checkout <ブランチ名(sample-branch)>
 そのディレクトリへ入り、先程の手順でブランチを作成します。
 
 
-ブランチが用意できましたら「Pullrequest」動作確認用に作業します。
+ブランチが用意できましたら「Pull request」動作確認用に作業します。
 
 確認用のREADME.mdを作成します。
 
@@ -191,14 +191,14 @@ git push -u origin sample-branch
 
 ![GHE06](./image/pullreq_branch.jpg)
 
-上の画面の赤枠 [ Compare & pull request ] を押下してプルリクエストを作成します。
+上の画面の赤枠 [ Compare & pull request ] を押下してPull requestを作成します。
 
-次画面に遷移しましたら、中央のテキストボックスにメッセージを記入し、[ Create pull request ]を押下すれば、プルリクエストの完了です。
+次画面に遷移しましたら、中央のテキストボックスにメッセージを記入し、[ Create pull request ]を押下すれば、Pull requestの完了です。
 
 ![GHE07](./image/pullreq_message.jpg)
 
 
-遷移した画面で作成したプルリクエストの状態を確認することができます。
+遷移した画面で作成したPull requestの状態を確認することができます。
 
 ![GHE08](./image/pullreq_create.jpg)
 
@@ -207,7 +207,7 @@ git push -u origin sample-branch
 ### ■ Merge
 
 「Pull request」でレビュー依頼を受けた開発責任者は、レビューを実施後、問題なければ「master」ブランチと
-プルリクエストのブランチ「sample-branch」を「merge」し、開発資産の統合をはかります。
+Pull requestのブランチ「sample-branch」を「Merge」し、開発資産の統合をはかります。
 
 **Merge 手順**
 
@@ -222,14 +222,14 @@ git push -u origin sample-branch
 
 ![GHE10](./image/merge_message.jpg)
 
-レビュー完了しましたので、[ Merge pull request ]を押下し「 merge 」します。
+レビュー完了しましたので、[ Merge pull request ]を押下し「 Merge 」します。
 
 ![GHE11](./image/merge.jpg)
 
 
- GitHub では「 Pull request」の「 merge 」の方法が画面から選択できるようになりました。
+ GitHub では「Pull request」の「 Merge 」の方法が画面から選択できるようになりました。
  
- [ Merge pull request ]ボタンをプルダウンしますと、3つの「 merge 」方法が選択できます。
+ [ Merge pull request ]ボタンをプルダウンしますと、3つの「 Merge 」方法が選択できます。
 
  ![GHE12](./image/merge_3patterns.jpg)
 
@@ -238,18 +238,18 @@ git push -u origin sample-branch
 >
 > All commits from this branch will be added to the base branch via a merge commit.
 >
-> デフォルトの「 merge 」方法です。
+> デフォルトの「 Merge 」方法です。
 >
-> プルリクエストしたブランチに存在するすべてのコミットはマージコミットを経てベースブランチ（本ガイドではmasterブランチ）へ統合されます。
+> Pull requestしたブランチに存在するすべてのコミットはマージコミットを経てベースブランチ（本ガイドではmasterブランチ）へ統合されます。
 
 
 > [ Squash and merge ]
 >
 > The 1 commit from this branch will be added to the base branch.
 >
-> プルリクエスしたブランチに複数のコミットがあった場合、それらを１つにまとめて１つのコミットとしてmasterブランチへ統合します。
+> Pull requestしたブランチに複数のコミットがあった場合、それらを１つにまとめて１つのコミットとしてmasterブランチへ統合します。
 >
-> プルリクエストの複数のコミットの履歴はmasterには反映されず、１つのコミットとして扱われます。
+> Pull requestの複数のコミットの履歴はmasterには反映されず、１つのコミットとして扱われます。
 >
 > 細かな修正や追加で大量のコミットが発生した場合にそれらを1回のコミットとして扱うようなイメージです。
 
@@ -258,7 +258,7 @@ git push -u origin sample-branch
 >
 > The 1 commit from this branch will be rebased and added to the base branch.
 >
-> プルリクエストしたブランチに存在するコミットをリベースして１つ１つ履歴を残してmasterブランチへ統合します。
+> Pull requestしたブランチに存在するコミットをリベースして１つ１つ履歴を残してmasterブランチへ統合します。
 >
 > 分岐した作業履歴を分かりやすく一直線の作業履歴に変えるイメージです。
 >
@@ -269,10 +269,10 @@ git push -u origin sample-branch
 
  ![GHE13](./image/merge_success.jpg)
 
-上図赤枠「 Pull request successfully merged and closed 」とプルリクエストのマージが成功したことのメッセージが出現すれば完了です。
+上図赤枠「 Pull request successfully merged and closed 」とPull requestのマージが成功したことのメッセージが出現すれば完了です。
 
 また、同じく赤枠の[Delete branch]を押下すると「 Pull request」で使用したブランチを削除することができます。
 
-以上を踏まえて、開発チーム内で「 Pull request 」 と「 merge 」を 効果的に行ってください。
+以上を踏まえて、開発チーム内で「 Pull request 」 と「 Merge 」を 効果的に行ってください。
 
 [[第4章 JenkinsとGitHubの連携へ]](configuration.md)

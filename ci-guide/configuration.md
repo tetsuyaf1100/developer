@@ -12,18 +12,18 @@
 
 ## 4-1. GitHub EnterpriseのJenkinsへのトリガー
 
-本ガイドでは「 GitHub Enterprise 」のリポジトリに行われた「PullRequest」と「Merge」をトリガーとしてJenkinsのジョブを実行させます。
+本ガイドでは「 GitHub Enterprise 」のリポジトリに行われた「Pull request」と「Merge」をトリガーとしてJenkinsのジョブを実行させます。
 
-Jenkinsでは「PullRequest」で起動するジョブと「Merge」で起動するジョブを用意し、
+Jenkinsでは「Pull request」で起動するジョブと「Merge」で起動するジョブを用意し、
 次の項で紹介する WebHookの機能で「 GitHub Enterprise 」から「Jenkins」へ送られてくる情報を判断し、該当するジョブを実行します。
 
 具体的なジョブは第7章で作成します。
 
-ここではJenkinsの起動に「PullRequest」と「Merge」をトリガーとして利用することをご確認下さい。
+ここではJenkinsの起動に「Pull request」と「Merge」をトリガーとして利用することをご確認下さい。
 
 ## 4-2. WebHookの設定
 
-WebhookとはPushやPullRequestなどのイベントによりGitHub Enterpriseのリポジトリに変化があったことを連携するURLへ通知する機能です。
+WebhookとはPushやPull requestなどのイベントによりGitHub Enterpriseのリポジトリに変化があったことを連携するURLへ通知する機能です。
 
 Payloadというパラメータでイベントに関する詳細情報を渡すことができます。
 
@@ -52,7 +52,7 @@ Jenkins 画面での設定については、ジョブ作成時に設定が必要
 
   Jenkins 側では、このパラメータを受け取ることで、ジョブのトリガーとして利用することが可能になります。
 
-  さらに詳細情報を読み取ることで発生したイベントが「PullRequest」なのか「Merge」なのかを判別することも可能になります。
+  さらに詳細情報を読み取ることで発生したイベントが「Pull request」なのか「Merge」なのかを判別することも可能になります。
 
   - ジョブの[ 設定 ] → [ general ] → [ ビルドのパラメータ化 ] にチェックします。
   - チェック後、[ パラメータの追加 ] → [ 文字列 ] を選択します。
@@ -274,7 +274,7 @@ http://[USER_ID]:[API_TOKEN]@[JENKINS_HOST]/job/[JOB_NAME]/buildWithParameters?t
 
       選択した項目に対してWebHookを起動します。
 
-  本書ではpullrequest時のみWebHookを起動させるため、『Let me select individual events.』を選択し、PullRequestを選択します。
+  本書ではpull request時のみWebHookを起動させるため、『Let me select individual events.』を選択し、Pull requestを選択します。
 
   > ![Content type](./image/webhook_trigger.jpg)
 

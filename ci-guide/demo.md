@@ -16,7 +16,7 @@
 
 各開発チームが作業を行う前にGitHub Enterpriseのリポジトリのmasterブランチから資産を取得します。<br/>
 
-手順は[「第3章 3-2.PullRequest と Merge 」](#git_function)で紹介したとおりです。<br/>
+手順は[「第3章 3-2.Pull request と Merge 」](#git_function)で紹介したとおりです。<br/>
 
 ここでは、<br/>
 - 資産管理のリモートリポジトリ名を「CI_Guide」
@@ -41,7 +41,7 @@
 
 開発チームでの作業が完了したら、リモートリポジトリ「CI_Guide」へPushします。<br/>
 
-手順は同じく[「第3章 3-2.PullRequest と Merge 」](#git_function)で紹介したとおりです。<br/>
+手順は同じく[「第3章 3-2.Pull request と Merge 」](#git_function)で紹介したとおりです。<br/>
 
 ここでは「ci_test.md」ファイルを作成し、リモートリポジトリへPushします。
 
@@ -73,26 +73,26 @@ git push -u origin team_A
 赤枠④にコミットする際につけたメッセージ「開発チームＡ」が正しく表示されています。<br/>
 ブランチにPushしたファイルは「ci_test.md」は「souce/_posts」フォルダに格納されました。<br/>
 
-**Pull Requestを契機にJenkinsの作動**<br/>
+**Pull requestを契機にJenkinsの作動**<br/>
 
-ブランチに正しく資産が格納できましたら、レビュー依頼 Pull Requestを作成します。<br/>
-想定利用シナリオではこのPull Requestを契機にJenkinsが実行されます。<br/>
+ブランチに正しく資産が格納できましたら、レビュー依頼 Pull requestを作成します。<br/>
+想定利用シナリオではこのPull requestを契機にJenkinsが実行されます。<br/>
 ![scenario03](./image/scenario03.jpg)
 　<br/>
 
 以下シナリオにしたがって実行していきます。<br/>
 
-**シナリオ①「GitHubでPullRequest（レビュー依頼）」**<br>
+**シナリオ①「GitHubでPull request（レビュー依頼）」**<br>
 
-前掲【リモートリポジトリ「CI_Guide」画面その２】の赤枠⑤からPull Requestを作成します。<br/>
-手順は第3章の[「PullRequest 手順」](#pullreq)の通りです。<br/>
+前掲【リモートリポジトリ「CI_Guide」画面その２】の赤枠⑤からPull requestを作成します。<br/>
+手順は第3章の[「Pull request 手順」](#pullreq)の通りです。<br/>
 
 ![scenario_pullreq](./image/scenario_pullreq.jpg)
 　<br/>
 
-**シナリオ②「PullRequestを契機にwebhook」**<br>
+**シナリオ②「Pull requestを契機にwebhook」**<br>
 
-PullRequestを作成するとJenkinsの[『「Pullrequest用 Pipeline」のScript 記述例』](#script_pullreq)で作成したPipelineが作動します。<br/>
+Pull requestを作成するとJenkinsの[『「Pull request用 Pipeline」のScript 記述例』](#script_pullreq)で作成したPipelineが作動します。<br/>
 本ガイドでは「pullrequest_teamA」という名で作成し実行しました。<br/>
 Jenkins画面で確認します。<br/>
 ![scenario_input](./image/scenario_input.jpg)
@@ -141,7 +141,7 @@ MergeされるとJenkinsの[『「Merge用 Pipeline」のScript 記述例』](#s
 ![scenario_pipeline_merge](./image/scenario_pipeline_merge.jpg)
 　<br/>
 
-以下、シナリオ⑧から⑩まではPullRequestの場合とほぼ同じです。<br/>
+以下、シナリオ⑧から⑩まではPull requestの場合とほぼ同じです。<br/>
 
 **シナリオ⑪ CF（本番）へデプロイ**<br>
 

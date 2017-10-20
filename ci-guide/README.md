@@ -82,9 +82,9 @@
    1. リモートリポジトリの作成方法
    1. ローカルリポジトリの作成方法
 
-1. Pullrequestとmerge
+1. Pull requestとmerge
 
-   1. Pullrequest
+   1. Pull request
    1. merge
 
 [第4章 JenkinsとGitHubの連携](configuration.md)
@@ -118,7 +118,7 @@
 1. Jenkinsのジョブの作成
 1. Jenkins パイプラインの作成方法
 
-   1. Pullrequest用のpipeline設定
+   1. Pull request用のpipeline設定
    1. Merge用のpipeline設定
 
 [第8章 デモ実行と運用](demo.md)

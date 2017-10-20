@@ -10,7 +10,7 @@
 
 『想定利用シナリオ』の中でJenkinsのジョブを作成する部分は具体的には以下の部分です。
 
- （ Pullrequest または Merge を契機にJenkinsのPipelineが起動します。）
+ （ Pull request または Merge を契機にJenkinsのPipelineが起動します。）
 
 ```
 「GitHub Enterprise」から資産を取得しWorkSpaceに格納<br/>
@@ -31,7 +31,7 @@ html 構文チェック<br/>
 Mergeの場合は本番環境へデプロイ
 ```
 
-資産格納先である「GitHub Enterprise」へ開発チームがPullrequestを行うのか管理者がMergeを行うかでジョブが少々異なりますが、ほぼ同じジョブを繰り返す形になります。<br/>
+資産格納先である「GitHub Enterprise」へ開発チームがPull requestを行うのか管理者がMergeを行うかでジョブが少々異なりますが、ほぼ同じジョブを繰り返す形になります。<br/>
 
 
 **事前準備** <br/>
@@ -94,7 +94,7 @@ git push origin master
 >開発資産を管理している「GitHub Enterprise」のリポジトリから資産を取得し、Jenkinsの作業スペースであるWorkSpaceに資産を格納します。<br/>
 >
 >注意点は、<br/>
->   ・Pullrequestの場合とmergeの場合で取得するリポジトリのブランチを変えること。<br/>
+>   ・Pull requestの場合とmergeの場合で取得するリポジトリのブランチを変えること。<br/>
 >   ・WorkSpaceの内容を常に最新の状態にするため「ビルド開始前にワークスペースを削除する」を行うこと。<br/>
 >です。<br/>
 >
@@ -113,7 +113,7 @@ git push origin master
 >         取得する資産が格納されているブランチを設定します。<br/>
 >         ※複数のブランチの設定やワイルドカードの仕様が可能。<br/>
 >         本書では、<br/>
->                　・ 開発チームが行うPullrequestの場合 →「 */develop 」ブランチ<br/>
+>                　・ 開発チームが行うPull requestの場合 →「 */develop 」ブランチ<br/>
 >                　・ 管理者が行うmergeの場合 →「 */master 」ブランチ<br/>
           を設定します。<br/>
 >　
@@ -244,18 +244,18 @@ git push origin master
 
 作成したジョブをPipelineでまとめ、資産格納を契機に自動的にCIを実行できるように設定します。<br/>
 
-ポイントは資産格納の「Pullrequest」と「Merge」を判断し、それぞれを契機にPipelineを実行させる点です。
+ポイントは資産格納の「Pull request」と「Merge」を判断し、それぞれを契機にPipelineを実行させる点です。
 
-**Pullrequest用のPipeline作成**<br/>
+**Pull request用のPipeline作成**<br/>
 
-まずは、[「Pipeline作成手順」](#pipeline)を参考に想定シナリオの「Pullrequest」のパターンを設定していきます。
+まずは、[「Pipeline作成手順」](#pipeline)を参考に想定シナリオの「Pull request」のパターンを設定していきます。
 
 手順
   - [ 新規ジョブの作成 ] → [ Pipeline ]を選択
   - [「第4章 4-2. WebHookの設定  」](#webhook)を参考にWebHookを設定します。
   - ジョブの詳細設定画面でPipelineエリアにスクリプト記述
 
-   「Pullrequest用 Pipeline」のScript 記述例<a name="script_pullreq"></a><br/>
+   「Pull request用 Pipeline」のScript 記述例<a name="script_pullreq"></a><br/>
 
 > ```
 >
@@ -313,7 +313,7 @@ git push origin master
 1.　payloadの判定<br/>
 
 webhookが発生するとGitHub側からpayloadのパーラメータが送られてきます。<br/>
-このパーラメータでwebhookが発生したイベントが「pullrequest」かどうかを判定しています。<br/>
+このパーラメータでwebhookが発生したイベントが「pull request」かどうかを判定しています。<br/>
 
 ```
 def p = env.payload.indexOf("action\":\"opened")
