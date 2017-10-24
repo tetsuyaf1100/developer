@@ -17,6 +17,7 @@
 Markdownlint は ruby 形式のため ruby の導入が必要です。
 
 rubyの導入手順  
+
 参考サイト
   - [ruby公式サイト](https://www.ruby-lang.org)
   - [rbenv公式リポジトリ](https://github.com/rbenv/rbenv)
@@ -63,7 +64,7 @@ $ cd markdownlint
 $ rake install
 
 #テスト実施コマンド
-$ mdl < Markdown ファイル>
+$ mdl { チェックするファイル .md }
 ```
 
 ### html 構文チェックツール
@@ -76,7 +77,7 @@ node.js のバージョン確認
 `node -v` または `nvm ls`
 
 node.jsのバージョン変更
-`nvm use {バージョン名}`
+`nvm use { バージョン名 }`
 
 ※node.jsのインストールは[「2-3. Hexo導入手順」](ci-server.md)で実施しています。
 
@@ -84,7 +85,7 @@ node.jsのバージョン変更
 $ npm install htmlhint -g
 
 # テスト実施コマンド
-$ cat <チェックするファイル.html> | htmlhint stdin
+$ cat { チェックするファイル.html } | htmlhint stdin
 
 # またはチェックしたいファイルがあるディレクトリへ移動し、以下コマンドを実行
 $ htmlhint
@@ -121,12 +122,12 @@ $ make
 検査を行うには次のコマンドを実行します。
 
 ```bash
-$ ./skipfish -o <出力先ディレクトリ名> <検査対象サイト url>
+$ ./skipfish -o { 出力先ディレクトリ名 } { 検査対象サイト url }
 ```
 
 なおSkipfishのコマンドにはさまざまオプションが用意されており、多彩な機能が利用できます。
 
-検査が終了したら <出力先ディレクトリ>に検査結果のレポートが html 形式で格納されます。
+検査が終了したら { 出力先ディレクトリ } に検査結果のレポートが html 形式で格納されます。
 
 その htmlファイルをブラウザで開いて検査結果が確認できます。
 
