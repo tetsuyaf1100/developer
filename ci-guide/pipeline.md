@@ -1,13 +1,13 @@
 # 第7章 CI用Pipelineの設定
 
-この章では[『想定利用シナリオ』](#scenario) に基づいて [Jenkins Pipeline](#pipeline) を作成していきます。
+この章では[『想定利用シナリオ』](overview.md) に基づいて [Jenkins Pipeline](ci-server.md) を作成していきます。
 
 大筋では『想定利用シナリオ』の各作業を Jenkins のジョブとして作成し、次にそれらを Pipeline でまとめ、
-最終的には資産格納を契機に自動的にCIを実行できるような設定にします。
+最終的には資産格納を契機に自動的に CI を実行できるような設定にします。
 
 ## 7-1. Jenkins のジョブの作成
 
-第2章で紹介した[ジョブ作成手順](#job)を参考に『想定利用シナリオ』で必要なジョブを作成します。
+[「2-2. Jenkinsの操作画面について ジョブ作成手順」](ci-server.md)を参考に『想定利用シナリオ』で必要なジョブを作成します。
 
 『想定利用シナリオ』の中で Jenkins のジョブを作成する部分は具体的には以下の部分です。
 
@@ -40,55 +40,51 @@ Mergeの場合は本番環境へデプロイ
 
 1．Hexo資産を作成し、「 GitHub Enterprise 」へ格納
 
-これからJenkinsの設定を行っていきますが、前提として、 Hexo の資産が「 GitHub Enterprise 」に格納されていなければなりません。
+本ガイドの Jenkins の設定を行う前提として、 Hexo の資産を「 GitHub Enterprise 」に格納します。
 
-Hexo資産の作成は[「第2章 2-3. Hexo導入手順」](#hexo)で紹介した例を参考にしてください。
+Hexo資産の作成は[「2-3. Hexo導入手順」](ci-server.md)で紹介した例を参考にしてください。
 
 次に作成したHexo資産を「 GitHub Enterprise 」に格納します。
 
-「 GitHub Enterprise 」にHexo資産格納用のリポジトリを作成し、Hexo を導入したディレクトリをそのリモートリポジトリにします。
+「 GitHub Enterprise 」にHexo資産格納用のリポジトリを作成し、Hexo 資産を作成したディレクトリをそのローカルリポジトリにします。
 
-手順は[「リポジトリ作成方法」](#repository)を参考に、以下の通りです。
+手順は[「3-1.GitHub Enterprise 導入手順」](github-enterprise.md)を参考にしてください。
 
+資産格納の手順は以下の通りです。
 
 ```bash
-# Hexo を導入したディレクトリに入ります。
-$ cd <Hexoを導入したディレクトリ>
+# Hexo 資産を作成したディレクトリに入ります。
+$ cd { Hexo 資産を作成したディレクトリ }
 
-# 「 GitHub Enterprise 」で作成した Hexo 用のリポジトリをクローンします。
-$ git clone git@github.com:ユーザ名/リポジトリ名
-（または git clone https://github.com/ユーザ名/リポジトリ名 ）
-
-# 上記で上手くいかない場合は
+# gitリポジトリ化
 $ git init
-$ git remote add origin  https://github.com/ユーザ名/リポジトリ名
 
-```
-
-Hexo 作業用ディレクトリと「 GitHub Enterprise 」の Hexo 資産格納用のリポジトリと連携ができましたら、
-資産を「 GitHub Enterprise 」へ格納します。
-
-```bash
 # ローカルリポジトリのファイルをインデックスに追加。
 # 初回は全てのファイルをインデックスに追加して下さい。
-# 2回目以降は追加または修正したファイルのみを追加していきます。
-$git add .
+$ git add .
 
 # コミット
 $git commit -m "[コミットのコメント記入]"
+
+# リモートリポジトリの追加
+$ git remote add origin  https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/ユーザ名/リポジトリ名
 
 # プッシュして ローカルリポジトリをリモートリポジトリへ反映させます。
 $git push origin master
 
 ```
 
-以上で「 Hexo 」で作成した静的ウェブページの資産が「 GitHub Enterprise 」のリポジトリに格納されます。
+以上で Hexo 資産が「 GitHub Enterprise 」のリポジトリに格納されました。
+
+2回目以降はブランチを作成し、追加修正したファイルのみを格納していきます。
+
+詳しくは[「3-2. Pull requestとMerge」](github-enterprise.md)を参考にしてください。
 
 2．テストツールの実行コマンド
 
 本ガイドでは Jenkins によって各テストツールを実行させていきます。
 
-以下、「第6章 テストツールの導入」で紹介した各テストツールの実行コマンドが Jenkins ユーザから実行できるようパスが通っている前提で、Jenkins ジョブの作成を行います。
+以下、[「第6章 テストツールの導入」](test-tools.md)で紹介した各テストツールの実行コマンドが Jenkins ユーザから実行できるようパスが通っている前提で、Jenkins ジョブの作成を行います。
 
 では、１つずつジョブを作成していきます。
 
@@ -124,7 +120,7 @@ $git push origin master
 >
 >       - 認証情報
 >
->         [「4-3. SSHの設定」](#SSH) を参考に、認証情報を設定します。
+>         [「4-3. SSHの設定」](configuration.md) を参考に、認証情報を設定します。
 >
 >   - ビルドするブランチ：
 >
@@ -161,7 +157,7 @@ $git push origin master
 >
 > 検査の対象になる .md ファイルは、以下の場所にあります。
 >
-> `workspace/<資産取得のジョブ名>/source/_posts`
+> `workspace/{ 資産取得のジョブ名 }/source/_posts`
 >
 > 「 Markdownlint 」の実行コマンドは `mdl { .md ファイル }` です。
 >
@@ -169,7 +165,7 @@ $git push origin master
 >
 >  [ 設定 ] → [ ビルド ] →  [ ビルド手順の追加 ]を押下し、プルダウンメニューから [ シェルの実行 ]を選択し、以下を記述します。
 >
->```
+>```bash
 >  cd ../{資産取得のジョブ名}/source/_posts
 >  mdl *.md
 >```
@@ -191,8 +187,8 @@ $git push origin master
 >
 >    先程と同じように、ジョブの設定 [ シェルの実行 ]のシェルスクリプトを以下のように記述します。
 >
->    ```
->    cd ../<資産取得のジョブ名>/
+>    ```bash
+>    cd ../{ 資産取得のジョブ名 }
 >    hexo generate
 >    ```
 >
@@ -203,14 +199,14 @@ $git push origin master
 >
 >    `hexo generate` で生成したhtmlファイルはデフォルトでは
 >
->    `workspace/<資産取得のジョブ名>/public/`に格納されます。
+>    `workspace/{ 資産取得のジョブ名 }/public/`に格納されます。
 >
 >    この生成したhtmlファイルの構文チェックを「HtmlHint」ツールで実施します。
 >
 >    手順は同じくジョブの設定でビルドを[ シェルの実行 ]にして以下のように記述するだけです。
 >
->    ```
->    cd ../<資産取得のジョブ名>/public
+>    ```bash
+>    cd ../{ 資産取得のジョブ名 }/public
 >    htmlhint
 >    ```
 
@@ -218,20 +214,18 @@ $git push origin master
 >
 >    本ガイドではテスト用サーバとしてK5提供サービスの「 CF 」を利用します。
 >
->    また本ガイドでのデプロイ先はすべて「 CF 」になりますので手順は同じになります。
->
 >    設定のビルドの[ シェルの実行 ]は以下のように記述します。
 >
->    デプロイする資産であるhtmlファイルは `/var/lib/jenkins/workspace/<資産取得のジョブ名>/public` にあります。
+>    デプロイする資産であるhtmlファイルは `workspace/{ 資産取得のジョブ名 }/public` にあります。
 >
->    ```
->    readonly APPLICATION_NAME=<アプリケーション名>
->    cd ../<資産取得のジョブ名>/public
->    cf api --skip-ssl-validation <APIエンドポイント>
->    cf auth <ユーザーID><パスワード>
->    cf target -o <組織名>
->    cf target -s <スペース名>
->    cf push ${APPLICATION_NAME} -p ../<資産取得のジョブ名>/public
+>    ```bash
+>    readonly APPLICATION_NAME={ アプリケーション名 }
+>    cd ../{ 資産取得のジョブ名 }/public
+>    cf api --skip-ssl-validation { APIエンドポイント }
+>    cf auth { ユーザーID }{ パスワード }
+>    cf target -o { 組織名 }
+>    cf target -s { スペース名 }
+>    cf push ${APPLICATION_NAME} -p ../{ 資産取得のジョブ名 }/public
 >
 >    ```
 >   デプロイの確認は、ジョブの [ コンソール出力 ]に表示されたCFアップロード結果のURLで確認できます。
@@ -240,19 +234,19 @@ $git push origin master
 >
 >    テストサーバーに格納したファイルに「skipfish」を利用してアタックテスト（脆弱性検査）を実施します。
 >
->   ```
+>   ```bash
 >   # 結果レポート格納用のディレクトリ作成
 >   rm -rf results
 >   mkdir results
 >
 >   # skipfish 実施
->   cd <Skipfishインストール先ディレクトリ>
+>   cd { Skipfishインストール先ディレクトリ }
 >   # 環境変数に WORKSPACE を設定します
->    （※$WORKSPACE = /var/lib/jenkins/workspace/このジョブ名/）
->   ./skipfish -o $WORKSPACE/results <CFアップロード結果のURL>
+>    （※$WORKSPACE = /var/lib/jenkins/workspace/{ アタックテストのジョブ名 }/）
+>   ./skipfish -o $WORKSPACE/results { CFアップロード結果のURL }
 >
 >   ```
->  このジョブでのワークスペースは自身のworkspaceを利用します。
+>  ワークスペースは{ 資産取得のジョブ名 }ではなく、{ アタックテストのジョブ名 }のworkspaceを利用します。
 >
 >  このジョブのworkspace以下にresultsディレクトリが作成され、html形式の結果レポートが格納されます。
 >
@@ -268,13 +262,14 @@ $git push origin master
 >
 > ![skipfish_results](./image/skipfish_result02.JPG)
 >
-> 検査結果の見方はSkipfish公式サイト等でご確認ください。
+> 検査結果の見方は Skipfish 公式サイト等でご確認ください。
 
-**7.成功時メール報告**<br/>
+**7.成功時メール報告**
+
 >
 >すべてのジョブが成功した場合に管理者へメールにて報告するためのジョブを設定します。
 >
->[「拡張E-mail通知の設定」](#extend_email)を参考に設定してください。
+>[「第2章 拡張E-mail通知の設定」](ci-server.md)を参考に設定してください。
 >
 >手順
 >
@@ -296,38 +291,38 @@ $git push origin master
 
 **Pull request用のPipeline作成**
 
-まずは、[「Pipeline作成手順」](#pipeline)を参考に想定シナリオの「Pull request」のパターンを設定していきます。
+まずは、[「第2章 Pipeline作成手順」](ci-server.md)を参考に想定シナリオの「Pull request」のパターンを設定していきます。
 
 手順
   - [ 新規ジョブの作成 ] → [ Pipeline ]を選択
-  - [「第4章 4-2. WebHookの設定  」](#webhook)を参考にWebHookを設定します。
+  - [「4-2. WebHookの設定  」](configuration.md)を参考にWebHookを設定します。
   - ジョブの詳細設定画面でPipelineエリアにスクリプト記述
 
-   「Pull request用 Pipeline」のScript 記述例<a name="script_pullreq"></a>
+   「Pull request用 Pipeline」のScript 記述例
 
-> ```
+> ```bash
 >
 >def p = env.payload.indexOf("action\":\"opened")
 >if(p != -1){
 > 　node{
 >　　# 資産取得
 >　　stage('Pullrequest資産取得'){
->　　　build job: '< 1.資産取得のジョブ名 >'
+>　　　build job: '{ 1.資産取得のジョブ名 }'
 >　　}
 >　
 >　　# Markdown 構文チェック
 >　　stage('MD構文チェック'){
->　　　build job: '< 2.Markdown 構文チェックのジョブ名 >'
+>　　　build job: '{ 2.Markdown 構文チェックのジョブ名 }'
 >　　}
 >　
 >　　# htmlファイルを生成
 >　　stage('html生成'){
->　　　build job: '< 3.htmlファイル生成のジョブ名 >'
+>　　　build job: '{ 3.htmlファイル生成のジョブ名 }'
 >　　}
 >　　　
 >　　# html構文チェック
 >　　stage('html構文チェック'){
->　　　build job: '< 4.html構文チェックのジョブ名 >'
+>　　　build job: '{ 4.html構文チェックのジョブ名 }'
 >　　}
 >　}
 >
@@ -339,16 +334,16 @@ $git push origin master
 >　node{
 >　　# CF（開発）サーバ（テストサーバ）へデプロイ
 >　　stage('CF開発格納'){
->　　　build job: '<5.テストサーバへデプロイのジョブ名 >'
+>　　　build job: '{ 5.テストサーバへデプロイのジョブ名 }'
 >　　}
 >　　　
 >　　# アタックテスト（脆弱性検査）
 >　　stage('脆弱性チェック'){
->　　　build job: ' <6.アタックテスト（脆弱性検査）のジョブ名> '
+>　　　build job: ' { 6.アタックテスト（脆弱性検査）のジョブ名 } '
 >　　}
 >　　# 成功時メール報告
 >　　stage('メール報告'){
->　　　build job: ' <7.成功時メール報告のジョブ名> '
+>　　　build job: ' { 7.成功時メール報告のジョブ名 } '
 >　　}
 >　}
 >}
@@ -364,7 +359,7 @@ webhookが発生するとGitHub側からpayloadのパーラメータが送られ
 
 このパーラメータでwebhookが発生したイベントが「pull request」かどうかを判定しています。
 
-```
+```bash
 def p = env.payload.indexOf("action\":\"opened")
 if(p != -1){
      ----- 省略 -----
@@ -384,10 +379,10 @@ if(p != -1){
 
 例：inputで一時停止した際にメールを送信
 
-```
+```bash
 # 管理者認証（Pipelineの一時停止）
 stage('管理者認証'){
-  mail (to: '<メールアドレス>',
+  mail (to: '{ メールアドレス }',
         subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) is waiting for input",
         body: "Please go to ${env.BUILD_URL}.");
   input '続行しても大丈夫ですか？';
@@ -402,14 +397,14 @@ mergeを契機に実行されるPipelineの記述もほぼ同じです。
 
 - payloadのパーラメータの判定方法
 - masterブランチから資産取得すること
-- テストサーバとしてCF(Staging）を利用すること
+- テストサーバとして CF (Staging）を利用すること
 
 
 1.　mergeの場合のpayloadの判定
 
 mergeの場合、payloadのパーラメータは以下で判断します。
 
-```
+```bash
 def cl = env.payload.indexOf("action\":\"closed")
 def cls = env.payload.indexOf("merged\":true")
 
@@ -427,11 +422,11 @@ merge用の資産取得ジョブでは必ずmasterブランチから資産を取
 
 mergeした資産は公開用になりますので、テスト環境は本番環境と同等のステージング環境で行います。
 
-本ガイドでは CF（staging）としてステージングサーバを利用します。
+本ガイドでは CF（Staging）としてステージングサーバを利用します。
 
-  「merge用 Pipeline」のScript 記述例<a name="script_merge"></a>
+  「merge用 Pipeline」のScript 記述例
 
-```
+```bash
 def cl = env.payload.indexOf("action\":\"closed")
 def cls = env.payload.indexOf("merged\":true")
 
