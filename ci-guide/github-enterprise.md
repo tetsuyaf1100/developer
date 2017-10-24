@@ -7,7 +7,7 @@ FUJITSU Cloud Service K5では、分散型のバージョン管理システム G
 
 「 GitHub Enterprise 」と Jenkins などの CI ツールと組み合わせることで自動デプロイが可能なCI環境が構築できます。
 
-特に複数人が参加するチーム開発において「 GitHub Enterprise 」の利用は開発資産管理のフローを簡略化し効果的な運用を実現できます。
+特に複数人が参加するチーム開発において「 GitHub Enterprise 」の利用は開発資産管理のフローを簡略化し、効果的な運用を実現できます。
 
 本ガイドでは、効率的な資産管理を実現するワークフロー「Github Flow」を意識してCI環境を構築していきます。
 
@@ -45,13 +45,13 @@ FUJITSU Cloud Service K5では、分散型のバージョン管理システム G
 
  先程作成したリモートリポジトリ「test-github」を利用して作成していきます。
 
-```
-# gitコマンドが使えるようにGitをインストールします。
+```bash
+# gitをインストール。
 yum -y install git
 
 # 作業用のディレクトリを用意し、中に入ります。
-mkdir <ローカルリポジトリ名>
-cd <ローカルリポジトリ>
+mkdir { ローカルリポジトリ名 }
+cd { ローカルリポジトリ }
 
 # 動作確認用に「 README.md 」を作成します。
 echo "# test-github" >> README.md
@@ -60,17 +60,17 @@ echo "# test-github" >> README.md
 git init
 
 #「 GitHub Enterprise 」の画面で作成したリモートリポジトリ情報を登録します。
-git remote add origin https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/ユーザ名/test-github(リモートリポジトリ名).git
+git remote add origin https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/ユーザ名/test-github.git
 ※注意：GitHub Enterprise のリポジトリurlのFQDN部分はご利用者ごとに異なります。
 
 （# sshで接続する場合は）
-（git remote add origin git@git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com:ユーザ名/test-github(リモートリポジトリ名).git)
+（git remote add origin git@git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com:ユーザ名/test-github.git)
 
 # 「README.md 」のファイルをインデックスに追加
 git add README.md
 
 # コミット
-git commit -m "[コミットのコメント記入]"
+git commit -m "{ コミットのコメント記入 }"
 
 # プッシュして ローカルリポジトリをリモートリポジトリへ反映させます。
 git push -u origin master
@@ -83,16 +83,17 @@ Username for 'https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/':
 Password for 'https://ユーザ名@git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com': 
 ここにパスワード入力
 
-
 ```
 
 「 GitHub Enterprise 」画面で確認
 
-`git remote add origin https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/ユーザ名/test-github(リモートリポジトリ名).git`
+以下の url で確認。
+
+`https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/ユーザ名/test-github.git`
 
 ![GHE04](./image/repository_push.jpg)
 
-動作確認用に作成した「 README.md 」が格納され、画面に「 test-github 」が表示されていれば完了です。
+動作確認用に作成したREADME.mdが格納され、画面に「 test-github 」が表示されていれば完了です。
 
 以上で開発資産管理の場として「 GitHub Enterprise 」の準備ができました。
 
@@ -124,7 +125,7 @@ Pull requestは分散型のバージョン管理システム GitHub の最も特
 各開発者がローカルリポジトリで加えた変更を他の開発者に通知する機能が Pull requestです。
 
 
-**Pull request 手順**<a name="pullreq"></a>
+**Pull request 手順**
 
 リポジトリにPull request用のブランチを作成します。
 
@@ -132,40 +133,20 @@ Pull requestは分散型のバージョン管理システム GitHub の最も特
 
 ```
 # プルリクエストを行うリポジトリへ入ります。
-cd <リポジトリのディレクトリ名>
+cd { リポジトリのディレクトリ名 }
 
 # ブランチ作成
-git checkout -b <ブランチ名(sample-branch)>
+git checkout -b sample-branch
 
 # git branchコマンドで、存在するブランチの一覧を確認
 git branch
   master
 * sample-branch
+※アスタリスク[ * ]がついているブランチが現在チェックアウトしているブランチです。
 
-# 作成したブランチに入り作業します。
-git checkout <ブランチ名(sample-branch)>
+# ブランチが異なる場合は、利用したいブランチにチェックアウトします。
+git checkout sample-branch
 ```
-
-もし、Pull requestを行うリポジトリが仮想サーバにまだ用意していなかった場合は「 GitHub Enterprise 」画面からクローンします。
-
-「 GitHub Enterprise 」画面からクローンするためのコードを取得します。
-
-[ Clone or download ]を押下し表示された https をコピーします。
-
-以下は先程作成したリモートリポジトリ「test-github」を使用した例です。
-
-![GHE05](./image/clone.jpg)
-
-
-次に仮想サーバへ入り、以下のコマンドを入力します。
-
-` git clone https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/ユーザ名/test-github(リモートリポジトリ名).git`
-
-
-クローンが成功するとクローンしたリポジトリ名のディレクトリが作成されます。
-
-そのディレクトリへ入り、先程の手順でブランチを作成します。
-
 
 ブランチが用意できましたら「Pull request」動作確認用に作業します。
 
@@ -175,7 +156,7 @@ git checkout <ブランチ名(sample-branch)>
 
 作成したMDファイルをコミットし、sample-branchブランチへプッシュします。
 
-```
+```bash
 # 作成したMDファイルをインデックスに追加。
 git add README.md
 
@@ -211,7 +192,8 @@ Pull requestのブランチ「sample-branch」を「Merge」し、開発資産�
 
 **Merge 手順**
 
-まずは、各ブランチの差異を確認します。<br/>
+まずは、各ブランチの差異を確認します。
+
 「Pull requests」のページの [ Files changed ] タブを押下し、コミット内容をレビューします。
 
 確認用に作成した「README.md」ファイルの状況が画面中央に表示されます。
@@ -236,16 +218,12 @@ Pull requestのブランチ「sample-branch」を「Merge」し、開発資産�
 
 > [ Create a merge commit ]
 >
-> All commits from this branch will be added to the base branch via a merge commit.
->
 > デフォルトの「 Merge 」方法です。
 >
 > Pull requestしたブランチに存在するすべてのコミットはマージコミットを経てベースブランチ（本ガイドではmasterブランチ）へ統合されます。
 
 
 > [ Squash and merge ]
->
-> The 1 commit from this branch will be added to the base branch.
 >
 > Pull requestしたブランチに複数のコミットがあった場合、それらを１つにまとめて１つのコミットとしてmasterブランチへ統合します。
 >
@@ -255,8 +233,6 @@ Pull requestのブランチ「sample-branch」を「Merge」し、開発資産�
 
 
 > [ Rebase and merge ]
->
-> The 1 commit from this branch will be rebased and added to the base branch.
 >
 > Pull requestしたブランチに存在するコミットをリベースして１つ１つ履歴を残してmasterブランチへ統合します。
 >
