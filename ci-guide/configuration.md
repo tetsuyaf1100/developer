@@ -27,7 +27,7 @@ WebhookとはPushやPull requestなどのイベントによりGitHub Enterprise�
 
 Payloadというパラメータでイベントに関する詳細情報を渡すことができます。
 
-連携先をJenkinsにすることによって、GitHub Enterpriseのイベント情報を契機(トリガー)にJenkinsのジョブを実行することが可能となります。
+連携先をJenkinsにすることによって、GitHub Enterpriseのイベント情報を契機（トリガー）にJenkinsのジョブを実行することが可能となります。
 
 GitHub Enterprise と連携先である Jenkins（画面およびK5上の仮想サーバ）、K5 IaaS サービスポータルでの設定が必要です。
 
@@ -48,7 +48,7 @@ Jenkins 画面での設定については、ジョブ作成時に設定が必要
 
 2. Payload
 
-  「Payload 」とは WebHook の契機となったイベントの詳細情報が入っているパラメーターです。
+  「Payload 」とは WebHook の契機となったイベントの詳細情報が入っているパラメータです。
 
   Jenkins 側では、このパラメータを受け取ることで、ジョブのトリガーとして利用することが可能になります。
 
@@ -70,7 +70,7 @@ Jenkins による CSRF 対策に関しては、Jenkins の公式サイト等で�
 
 Jenkins の管理画面で設定を以下のように行います。
 
-```
+```bash
 Jenkins の管理＞ グローバルセキュリティの設定＞ CSRF Protection
 
 □ CSRF 対策 　←ここのチェックを外します。
@@ -80,15 +80,142 @@ Jenkins の管理＞ グローバルセキュリティの設定＞ CSRF Protecti
 
 ### Jenkins （仮想サーバ）での設定
 
+**SSL対応とリバースプロキシ**
+
 Jenkins を導入したK5上の仮想サーバ(CentOS 7)での作業になります。
 
-K5 の GitHub Enterprise から Jenkins サーバに対して Webhook を行なう場合、指定するポートには制限(80 or 443)があります。
+K5 の GitHub Enterprise から Jenkins サーバに対して Webhook を行なうために、Web サーバソフトウェア
+[Apache](https://httpd.apache.org/)をリバースプロキシとして利用し、https(443)→http(8080)でアクセスを可能にします。
 
-Httpの場合では、Jenkinsのデフォルトポートは tcp8080、GitHub Enterprise は tcp80 となり、相違が生じます。
+以下、手順です。
 
-このため、GitHub Enterprise から tcp80 で送信されたリクエストを Jenkins の tcp8080 に転送するための処理（ポートフォワーディング）が必要になります。
+参考：[公式 wiki 「Running Jenkins behind Apache」](https://wiki.jenkins.io/display/JENKINS/Running+Jenkins+behind+Apache)
 
-具体的には、Jenkins を導入した仮想サーバOS（CentOS 7）に firewalld を導入し、ポートフォワーディングの設定を行います。 
+------------------------------------------------------------------
+
+> **注意**
+>
+> 本ガイドでは自己証明書を使用して手順を紹介しています。
+>
+> 実際にご利用の場合は信頼できる認証機関から発行された証明書を使用してください。
+>
+> 信頼できる証明書を使用する場合は、DNSを適切に設定してください。
+>
+> グローバルIPアドレスが必要になります。後述の[「K5 IaaS サービスポータルでの設定」](#k5setting)を参考にしてください。
+>
+
+
+
+1. ApacheとSSLモジュールのインストール
+
+`yum install -y httpd mod_ssl`
+
+2. SSLサーバー証明書及び秘密鍵の設置
+
+SSLサーバー証明書および秘密鍵の作成手順は省略します。
+
+SSL-VPN接続環境でご利用の方は、SCP を利用して、SSLサーバー証明書および秘密鍵を仮想サーバCentOS7へ送信してください。
+
+SSL-VPN接続環境に関しましては、[IaaS 機能説明書](https://k5-doc.jp-east-1.paas.cloud.global.fujitsu.com/doc/jp/iaas/document/function-manual/index.html#!_SSL-VPNクライアントのセットアップ（Windows編）)をご覧下さい。
+
+```bash
+# 証明書と秘密鍵のディレクトリ作成
+mkdir /etc/httpd/conf/ssl.crt
+mkdir /etc/httpd/conf/ssl.key
+
+# ディレクトリのパーミッションを700に設定
+chmod 700 /etc/httpd/conf/ssl.crt
+chmod 700 /etc/httpd/conf/ssl.key
+
+# 証明書＆秘密鍵ファイルを準備したディレクトリに転送
+mv server.crt /etc/httpd/conf/ssl.crt
+mv server.key /etc/httpd/conf/ssl.key
+
+# 起動時のSELinux（強制アクセス制御機能）のエラーを避けるために設定
+/sbin/restorecon /etc/httpd/conf/ssl.crt/server.crt
+/sbin/restorecon /etc/httpd/conf/ssl.key/server.key
+
+```
+
+3. Apache ( httpd ) 設定ファイルの修正
+
+プロキシの設定を `/etc/httpd/conf/httpd.conf` に以下のように記述します。
+
+【変更前】
+
+```bash
+～～～(前略)～～～
+
+IncludeOptional conf.d/*.conf
+```
+
+【変更後】
+
+```bash
+～～～(前略)～～～
+
+<VirtualHost *:80>
+    ServerAdmin  webmaster@localhost
+    Redirect permanent / https://{グローバルIP}/
+</VirtualHost>
+
+<VirtualHost *:443>
+    SSLEngine on
+    SSLCertificateFile /etc/httpd/conf/ssl.crt/server.crt
+    SSLCertificateKeyFile /etc/httpd/conf/ssl.key/server.key
+    ServerAdmin  webmaster@localhost
+    ProxyRequests     Off
+    ProxyPreserveHost On
+    AllowEncodedSlashes NoDecode
+    <Proxy *>
+        Order deny,allow
+        Allow from all
+    </Proxy>
+    ProxyPass         /  http://localhost:8080/ nocanon
+    ProxyPassReverse  /  http://localhost:8080/
+    ProxyPassReverse  /  http://{ローカルIP}:8080/
+    RequestHeader set X-Forwarded-Proto "https"
+    RequestHeader set X-Forwarded-Port "443"
+</VirtualHost>
+
+IncludeOptional conf.d/*.conf
+```
+
+4. Apache ( httpd ) サービス起動
+
+
+```bash
+#  SELinux対応
+setsebool -P httpd_can_network_connect on
+
+# サービス有効化
+systemctl enable httpd
+systemctl start httpd
+```
+5. セキュリティグループおよびファイアウォールの設定
+
+後述の[「K5 IaaS サービスポータルでの設定」](#k5setting)を参考に https 443のポートを開放してください。
+
+ポート解放後、ブラウザより`https://{グローバルIP}` で接続確認が出来ます。
+
+6. GitHub Enterprise 画面での設定変更
+
+参照：[「第4章 JenkinsとGitHub Enterpriseの連携」](configuration.md)
+
+GitHub Enterprise 画面「Webhooks/Add Webhooks 設定画面」> Payload URL 設定 を `https://` に変更してください。
+
+また自己証明書をご利用でエラーが出る場合は、「Webhooks / Manage webhook 画面」にてSSL証明書を検証しない設定にすることで、接続確認が可能になります。
+
+
+**参考：ポートフォワーディング**
+
+リバースプロキシではなく、firewalld のポートフォワーディング機能を利用して Webhook を行うことも可能です。
+
+セキュリティの観点ではリバースプロキシ方式をお勧めしますが、Webhook を簡単に確認したい方には firewalld の利用が便利です。
+
+さらに手順簡略化のため、GitHub Enterprise から tcp80 で送信されたリクエストを Jenkins の tcp8080 に転送するための処理（ポートフォワーディング）を想定します。
+
+本ガイドでは行いませんが、SSL対応を行い、https443 → https8443 でのポートフォワーディングも可能です。
 
 以下、手順です。
 
@@ -100,7 +227,7 @@ K5が提供するCentOS 7 のイメージには、デフォルトでfirewalldが
 
 firewalld を導入してください。
 
-```
+```bash
 #firewalldインストール
 yum -y install firewalld
 
@@ -121,7 +248,7 @@ systemctl status firewalld
 
 以下、tcp 80番ポートで受け取った通信を、tcp 8080番ポートへ転送する設定です。
 
-```
+```bash
 # ポートフォワーディング
 firewall-cmd --permanent --add-forward-port="port=80:proto=tcp:toport=8080"
 
@@ -135,7 +262,11 @@ firewall-cmd --list-all
 
 ```
 
-### K5 IaaS サービスポータルでの設定
+3. セキュリティグループおよびファイアウォールの設定
+
+後述の「K5 IaaS サービスポータルでの設定」を参考に http 80のポートを開放してください。
+
+### K5 IaaS サービスポータルでの設定 <a name="k5setting"></a>
 
 Jenkinsを導入したK5上の仮想サーバを導入したネットワークの設定を変更します。
 
@@ -154,30 +285,30 @@ Webhookのためにセキュリティグループ、およびファイアウォ�
 
 詳しくは、[IaaS 機能説明書](https://k5-doc.jp-east-1.paas.cloud.global.fujitsu.com/doc/jp/iaas/document/function-manual/index.html)をご覧ください。
 
-以下、参考として前項までに設定した GitHub Enterprise から tcp80 で送信されたリクエストを Jenkins の tcp8080 にポートフォワーディングする場合に必要なルール追加設定の例です。
+以下、参考として前項までに設定した リバースプロキシによるGitHub Enterprise から tcp443 で送信されたリクエストを Jenkins の tcp8080 へ送信する場合に必要なルール追加設定の例です。
 
-仮想サーバのセキュリティグループには、tcp80とtcp8080のポートを開放するルールを追加してください。
+仮想サーバのセキュリティグループには、tcp443とtcp8080のポートを開放するルールを追加してください。
 
-Webhookのために必要なセキュリティグループのルール例
+参考：セキュリティグループのルール例
 
 方向     | IPバージョン | プロトコル | ポート範囲  | 宛先
 :------- | :------------| :----------| :---------- |  :---------
-ingress  | IPv4         | tcp        | 80 - 80     | 0.0.0.0/0
+ingress  | IPv4         | tcp        | 443 - 443     | 0.0.0.0/0
 ingress  | IPv4         | tcp        | 8080 - 8080 | {クライアントIPプール}
 
-K5上のネットワークにファイアウォールを設定している方は、tcp80のポートを開放するルールを追加してください。
+K5上のネットワークにファイアウォールを設定している方は、tcp443のポートを開放するルールを追加してください。
 
-参考：Webhookのために必要なファイアウォールルール例
+参考：ファイアウォールルール例
 
 プロトコル     | 送信元IP [ポート]                    | 宛先IP [ポート] 
 :------------- | :------------------------------------| :------------------------------
-tcp            |  (any または Github EnterpriseのIP)  | {仮想サーバのグローバルIP} [80]
+tcp            |  (any または Github EnterpriseのIP)  | {仮想サーバのグローバルIP} [443]
 
 JenkinsサーバにグローバルIPを付与し、必要なポートを開放した以降は、Jenkinsのサービス画面にはグローバルIPからアクセスできます。
 
-仮想サーバIP : 8080 →　グローバルIP
+仮想サーバIP →　グローバルIP
 
-（例　192.168.1.13:8080　→　133.162.153.149）
+（例　192.168.1.13 →　133.162.153.149）
 
 
 ### GitHub Enterprise側での設定
@@ -302,7 +433,7 @@ Jenkinsを導入した仮想サーバ CentOS 7 で作業を行います。
 
 Jenkinsユーザで作業を行います。以下、手順です。
 
-```
+```bash
 # SSH Keys を格納するディレクトリを作成
 mkdir .ssh
 
