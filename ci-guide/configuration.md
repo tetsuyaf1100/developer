@@ -68,21 +68,21 @@ Jenkins による CSRF 対策に関しては、Jenkins の公式サイト等で�
 
 Jenkins の管理画面で設定を以下のように行います。
 
-```bash
+
 Jenkins の管理＞ グローバルセキュリティの設定＞ CSRF Protection  
-□ CSRF 対策 　←ここのチェックを外します。
-```
+□ CSRF 対策 　←ここのチェックを外します。  
+
 
 > ![グローバルセキュリティの設定](./image/CSRF.jpg)
 
 ### Jenkins （仮想サーバ）での設定
 
-**SSL対応とリバースプロキシ**
+#### SSL対応とリバースプロキシ
 
 Jenkins を導入したK5上の仮想サーバ(CentOS 7)での作業になります。
 
 K5 の GitHub Enterprise から Jenkins サーバに対して Webhook を行なうために、Web サーバソフトウェア
-[Apache](https://httpd.apache.org/)をリバースプロキシとして利用し、https(443)→http(8080)でアクセスを可能にします。
+[Apache](https://httpd.apache.org/)をリバースプロキシとして利用し、tcp(443)→tcp(8080)でアクセスを可能にします。
 
 参考：[公式 wiki 「Running Jenkins behind Apache」](https://wiki.jenkins.io/display/JENKINS/Running+Jenkins+behind+Apache)
 
@@ -95,10 +95,10 @@ K5 の GitHub Enterprise から Jenkins サーバに対して Webhook を行な�
 ------------------------------------------------------------------
 
 以下、手順です。 
- 
-仮想サーバCentOS7にて、以下のコマンドを実行します。  
 
 1. ApacheとSSLモジュールのインストール
+
+仮想サーバCentOS7にて、以下のコマンドを実行します。  
 
 `yum install -y httpd mod_ssl`
 
@@ -107,6 +107,8 @@ K5 の GitHub Enterprise から Jenkins サーバに対して Webhook を行な�
 SSLサーバー証明書および秘密鍵の作成手順は省略します。
 
 SCP を利用して、SSLサーバー証明書および秘密鍵を仮想サーバCentOS7へアップロードしてください。
+
+アップロード後、仮想サーバCentOS7にて、以下のコマンドを実行します。  
 
 ```bash
 # 証明書と秘密鍵をアップロードしたディレクトリに入ります。
@@ -176,7 +178,6 @@ IncludeOptional conf.d/*.conf
 
 4. Apache ( httpd ) サービス起動
 
-
 ```bash
 #  SELinux対応
 setsebool -P httpd_can_network_connect on
@@ -185,21 +186,10 @@ setsebool -P httpd_can_network_connect on
 systemctl enable httpd
 systemctl start httpd
 ```
-5. セキュリティグループおよびファイアウォールの設定 注意点
 
-後述の[「K5 IaaS サービスポータルでの設定」](#k5setting)を参考に https 443のポートを開放してください。
+以上で仮想サーバにリバースプロキシサーバが導入できました。
 
-ポート解放後、ブラウザより`https://{グローバルIP}` で接続確認が出来ます。
-
-6. GitHub Enterprise 画面での設定 注意点
-
-後述の[GitHub Enterprise側での設定](#GHEsetting)で、リバースプロキシを導入した場合の注意点です。
-
-- GitHub Enterprise 画面「Webhooks/Add Webhooks 設定画面」> Payload URL 設定 を `https://` に変更。  
-- 自己証明書をご利用でエラーが出る場合、「Webhooks / Manage webhook 画面」にてSSL証明書を検証しない設定にすることで接続確認が可能になります。  
-
-
-**参考：ポートフォワーディング**
+#### 参考：ポートフォワーディング
 
 リバースプロキシではなく、firewalld のポートフォワーディング機能を利用して Webhook を行うことも可能です。
 
@@ -208,7 +198,7 @@ systemctl start httpd
 さらに手順簡略化のため、GitHub Enterprise から tcp80 で送信されたリクエストを Jenkins の tcp8080 に転送するための処理（ポートフォワーディング）を想定します。
 
 本ガイドでは行いませんが、jsnkins にてSSL対応行い、
-443 → 8443( jenkinsのHTTPSのデフォルトポート ) でのポートフォワーディングも可能です。
+tcp443 → tcp8443( jenkinsのHTTPSのデフォルトポート ) でのポートフォワーディングも可能です。
 
 以下、手順です。
 
@@ -255,14 +245,10 @@ firewall-cmd --list-all
 
 ```
 
-3. セキュリティグループおよびファイアウォールの設定
-
-後述の「K5 IaaS サービスポータルでの設定」を参考に http 80のポートを開放してください。
-
-
 ### K5 IaaS サービスポータルでの設定 <a name="k5setting"></a>
 
-Jenkinsを導入したK5上の仮想サーバを導入したネットワークの設定を変更します。
+Jenkinsを導入した仮想サーバのネットワークの設定を変更します。  
+以下、K5 IaaS サービスポータルでの作業になります。  
 
 1. グローバルIP の付与
 
@@ -283,7 +269,7 @@ Webhookのためにセキュリティグループ、およびファイアウォ�
 
 仮想サーバのセキュリティグループには、tcp443とtcp8080のポートを開放するルールを追加してください。
 
-参考：セキュリティグループのルール例
+参考：セキュリティグループの追加ルール例
 
 方向     | IPバージョン | プロトコル | ポート範囲  | 宛先
 :------- | :------------| :----------| :---------- |  :---------
@@ -292,7 +278,7 @@ ingress  | IPv4         | tcp        | 8080 - 8080 | {クライアントIPプー
 
 K5上のネットワークにファイアウォールを設定している方は、tcp443のポートを開放するルールを追加してください。
 
-参考：ファイアウォールルール例
+参考：ファイアウォールルール追加例
 
 プロトコル     | 送信元IP [ポート]                    | 宛先IP [ポート] 
 :------------- | :------------------------------------| :------------------------------
@@ -304,6 +290,7 @@ JenkinsサーバにグローバルIPを付与し、必要なポートを開放�
 
 （例　192.168.1.13 →　133.162.153.149）
 
+※参考例のfirewalldを利用したtcp80 → tcp8080のポートフォワーディングを設定した場合は、 tcp80のポートを開放してください。
 
 ### GitHub Enterprise側での設定 <a name="GHEsetting"></a>
 
@@ -326,12 +313,15 @@ GitHub Enterprise側では、連携先URLとWebhookを作動させるイベン�
 
   上記【Webhooks/Add Webhooks 設定画面】の赤①の欄に以下を設定します。
 
-http://[USER_ID]:[API_TOKEN]@[JENKINS_HOST]/job/[JOB_NAME]/buildWithParameters?token=[TOKEN_NAME]
+```html
+[PROTOCOL]://[USER_ID]:[API_TOKEN]@[JENKINS_HOST]/job/[JOB_NAME]/buildWithParameters?token=[TOKEN_NAME]
+```
 
 次の表を参考に上記 url の各項目に値を入れて Payload URL を作成してください。
 
 設定項目      | 設定内容           
 :-----------  | :------------------------------------
+[PROTOCOL]    |  Jenkinsへのアクセスに使用するプロトコル　（例：https）
 [USER_ID]     |  Jenkinsにログインするためのユーザ名　（例：admin）
 [API_TOKEN]   |  Jenkinsのアカウントごとに発行されるトークン(後述)　（例：xxxxx）
 [JENKINS_HOST]|  {仮想サーバのグローバルIP}（JenkinsのHOST名)　（例：133.162.153.149）
@@ -339,10 +329,11 @@ http://[USER_ID]:[API_TOKEN]@[JENKINS_HOST]/job/[JOB_NAME]/buildWithParameters?t
 [TOKEN_NAME]  |  連携するJenkinsのジョブで設定した認証トークン　（例：pullrequest）
 
  
-  `例) http://admin:xxxxx@133.162.153.149/job/sample/buildWithParameters?token=pullrequest`
+  `例) https://admin:xxxxx@133.162.153.149/job/sample/buildWithParameters?token=pullrequest`
 
->**注意**
->本ガイドのリバースプロキシの設定を行った場合、Payload URL 設定 を `https://` に変更してください。
+>**注意**  
+>本ガイドのリバースプロキシの設定を行った場合、Payload URL の[PROTOCOL]設定 は `https` になります。  
+>firewalldを利用し、tcp80→tcp8080のポートフォワーディングを行った場合は、`http`になります。
 
 【API_TOKENの取得方法】
 
