@@ -2,9 +2,9 @@
 
 本ガイドの開発テストで使用するテストツールの導入手順と実行コマンドを示します。
 
-テストツールは仮想サーバ（CentOS 7）へ導入します。
+テストツールは仮想サーバ（ CentOS 7 ）へ導入します。
 
-実行コマンドはJenkinsのジョブ作成の際に利用します。
+実行コマンドは Jenkins のジョブ作成の際に利用します。
 
 -----------------------------------------------------------------------------------------------
 
@@ -61,6 +61,7 @@ $ rbenv global 2.4.2
 $ gem install mdl
 $ git clone https://github.com/mivok/markdownlint
 $ cd markdownlint
+$ gem install bundler
 $ rake install
 
 #テスト実施コマンド
@@ -104,19 +105,32 @@ Skipfish は Google が開発した脆弱性検査ツールで、CUI 環境で�
 以下、CentOS 7 への導入手順です。
 
 ```bash
-#事前準備として libidn と libpcre3 が必要になります。
-$ yum install openssl-devel
-$ yum install pcre-devel
-$ yum install libidn-devel
+# optディレクトリに入ります
+cd /opt
 
-# Skipfishをインストールします。
-# ダウンロードサイト https://code.google.com/archive/p/skipfish/
-# インストールしたらファイルを解凍します。
-$ tar xvzf skipfish-2.10b.tgz
-# 解凍され展開されたディレクトリに入り、
-$ cd skipfish-2.10b
-# make コマンドでソースからプログラムをビルドします。
-$ make
+# Skipfish の tgz ファイルを wget で取得します。
+# ダウンロードサイト https://code.google.com/archive/p/skipfish/downloads
+# 推奨版 (featured)：skipfish-2.10b.tgz (（※2017/10 現在)
+wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/skipfish/skipfish-2.10b.tgz
+
+# yumに必要なパッケージを追加します。
+yum install pcre-devel openssl-devel libidn-devel libidn2-devel
+
+# Jenkinsユーザ配下に作業ディレクトリ(例：test-skipfish)を作成します。
+mkdir /var/lib/jenkins/test-skipfish
+
+# tgz ファイルをコピーします。
+cp skipfish-2.10b.tgz /var/lib/jenkins/test-skipfish
+
+# コピー先の作業ディレクトリで tgz ファイルを解凍します。
+cd /var/lib/jenkins/test-skipfish
+tar zxvf skipfish-2.10b.tgz
+
+# 解凍され展開されたディレクトリ(例：skipfish-2.10b）に入ります。
+cd skipfish-2.10b
+
+#makeコマンドでソースからプログラムをビルドします。
+make
 ```
 
 検査を行うには次のコマンドを実行します。
