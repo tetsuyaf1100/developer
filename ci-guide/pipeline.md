@@ -458,7 +458,7 @@ if(cl != -1 && cls != -1){
            build job: '{ 資産取得のジョブ名 }'
       }
       stage('MD構文チェック'){
-           build job: { Markdown 構文チェックのジョブ名 }'
+           build job: '{ Markdown 構文チェックのジョブ名 }'
       }
       stage('html生成'){
            build job: '{ htmlファイル生成のジョブ名 }'
