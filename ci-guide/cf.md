@@ -22,6 +22,20 @@
 [「CF 使用手順チュートリアル」](https://cf-docs.jp-east-1.paas.cloud.global.fujitsu.com/ja/manual/tut/tut/topics/preface.html)の
 「開発者のアプリケーション開発の流れ＞事前設定＞CFコマンドの事前設定」を参照し、インストールして下さい。
 
+参考：[「Cloud Foundry CLI」](https://github.com/cloudfoundry/cli#installing-using-a-package-manager)
+
+```bash
+# Cloud Foundry Foundation package リポジトリを追加
+sudo wget -O /etc/yum.repos.d/cloudfoundry-cli.repo https://packages.cloudfoundry.org/fedora/cloudfoundry-cli.repo
+
+# cf CLI をインストール
+sudo yum install cf-cli
+
+# バージョン確認（導入の確認として）
+cf -v
+※cf version が表示されれば、導入成功です。
+```
+
 ## 5-3. CFアップロード手順
 
 CFへ資産をアップロードする手順を説明します。
