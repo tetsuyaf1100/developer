@@ -4,7 +4,9 @@
 
 テストツールは仮想サーバ（ CentOS 7 ）へ導入します。
 
-実行コマンドは Jenkins のジョブ作成の際に利用します。
+実行コマンドは Jenkins のジョブ作成の際に利用しますので、Jenkins ユーザでコマンドが実行できるように導入してください。
+
+本ガイドでは、Jenkins ユーザで導入作業を行います。
 
 -----------------------------------------------------------------------------------------------
 
@@ -16,7 +18,7 @@
 
 Markdownlint は ruby 形式のため ruby の導入が必要です。
 
-rubyの導入手順  
+ruby の導入手順  
 
 参考サイト
   - [ruby公式サイト](https://www.ruby-lang.org)
@@ -24,72 +26,75 @@ rubyの導入手順
 
 
 ```bash
-#rubyのバージョン管理ツールrbenvをgitより入手
-$ git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+# Jenkins ユーザで導入作業を行います。
+# ruby のバージョン管理ツール rbenv を git より入手
+git clone https://github.com/rbenv/rbenv.git ~/.rbenv
 
-#ruby-buildプラグインを追加
-$ git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+# ruby-build プラグインを追加
+git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
 
-#.bash_profileにrbenvのパスを追加
-$ echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
-$ echo 'eval "$(rbenv init -)"' >> ~/.bash_profile
-$ source ~/.bash_profile
+# .bash_profile に rbenv のパスを追加
+echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
+echo 'eval "$(rbenv init -)"' >> ~/.bash_profile
+source ~/.bash_profile
 
-#rubyのインストールに必要なパッケージをインストール
-$ yum -y install bzip2 gcc openssl-devel readline-devel zlib-devel
+# ruby のインストールに必要なパッケージをインストール
+sudo yum -y install bzip2 gcc openssl-devel readline-devel zlib-devel
 
-#バージョン確認
-$ rbenv --version
+# バージョン確認
+rbenv --version
 
-#インストールできるrubyのバージョン確認
-$ rbenv install --list
+# インストールできる ruby のバージョン確認
+rbenv install --list
 
-#rubyをインストール
-$ rbenv install {最新バージョン} （例：2.4.2）2017.10現在最新版
+# ruby をインストール
+rbenv install {最新バージョン} （例：2.4.2）2017.10現在最新版
 
-#インストールされているrubyバージョンリスト確認
-$ rbenv versions
+# インストールされている ruby バージョンリスト確認
+rbenv versions
 
-#バージョンを選択  ※インストールしたバージョンを選択して下さい。
-$ rbenv global 2.4.2
+# バージョンを選択  ※インストールしたバージョンを選択して下さい。
+rbenv global 2.4.2
 ```
 
-### Markdownlintの導入手順
+### Markdownlint の導入手順
 
 ```bash
-#gemはrubyと一緒に導入されたパッケージ管理ツールです。
-$ gem install mdl
-$ git clone https://github.com/mivok/markdownlint
-$ cd markdownlint
-$ gem install bundler
-$ rake install
+# Jenkins ユーザで導入作業を行います。
+# gem は ruby と一緒に導入されたパッケージ管理ツールです。
+gem install mdl
+git clone https://github.com/mivok/markdownlint
+cd markdownlint
+gem install bundler
+rake install
 
-#テスト実施コマンド
-$ mdl { チェックするファイル .md }
+# テスト実施コマンド
+mdl { チェックするファイル .md }
 ```
 
 ### html 構文チェックツール
 
 参考：[ HTMLHint ](http://htmlhint.com/)
 
-導入の前提としてnodeのバージョンがv0.11.15以上必要です。
+導入の前提として node のバージョンが v0.11.15 以上必要です。
 
 node.js のバージョン確認
 `node -v` または `nvm ls`
 
-node.jsのバージョン変更
+node.js のバージョン変更
 `nvm use { バージョン名 }`
 
-※node.jsのインストールは[「2-3. Hexo導入手順」](ci-server.md)で実施しています。
+※node.js のインストールは[「2-3. Hexo導入手順」](ci-server.md)で実施しています。
 
 ```bash
-$ npm install htmlhint -g
+# Jenkins ユーザで導入作業を行います。
+npm install htmlhint -g
 
 # テスト実施コマンド
-$ cat { チェックするファイル.html } | htmlhint stdin
+cat { チェックするファイル.html } | htmlhint stdin
 
 # またはチェックしたいファイルがあるディレクトリへ移動し、以下コマンドを実行
-$ htmlhint
+htmlhint
 ```
 
 ### アタックテスト（脆弱性検査）ツール
@@ -105,7 +110,8 @@ Skipfish は Google が開発した脆弱性検査ツールで、CUI 環境で�
 以下、CentOS 7 への導入手順です。
 
 ```bash
-# optディレクトリに入ります
+# Jenkins ユーザで導入作業を行います。
+# opt ディレクトリに入ります
 cd /opt
 
 # Skipfish の tgz ファイルを wget で取得します。
@@ -113,10 +119,10 @@ cd /opt
 # 推奨版 (featured)：skipfish-2.10b.tgz (（※2017/10 現在)
 wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/skipfish/skipfish-2.10b.tgz
 
-# yumに必要なパッケージを追加します。
-yum install pcre-devel openssl-devel libidn-devel libidn2-devel
+# yum に必要なパッケージを追加します。
+sudo yum install pcre-devel openssl-devel libidn-devel libidn2-devel
 
-# Jenkinsユーザ配下に作業ディレクトリ(例：test-skipfish)を作成します。
+# Jenkins ユーザ配下に作業ディレクトリ(例：test-skipfish)を作成します。
 mkdir /var/lib/jenkins/test-skipfish
 
 # tgz ファイルをコピーします。
@@ -129,7 +135,7 @@ tar zxvf skipfish-2.10b.tgz
 # 解凍され展開されたディレクトリ(例：skipfish-2.10b）に入ります。
 cd skipfish-2.10b
 
-#makeコマンドでソースからプログラムをビルドします。
+# make コマンドでソースからプログラムをビルドします。
 make
 ```
 
@@ -143,6 +149,6 @@ $ ./skipfish -o { 出力先ディレクトリ名 } { 検査対象サイト url }
 
 検査が終了したら { 出力先ディレクトリ } に検査結果のレポートが html 形式で格納されます。
 
-その htmlファイルをブラウザで開いて検査結果が確認できます。
+その html ファイルをブラウザで開いて検査結果が確認できます。
 
 [[第7章 CI用Pipelineの設定へ]](pipeline.md)
