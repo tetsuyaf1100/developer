@@ -482,6 +482,8 @@ Default Recipients              | 送信先メールアドレス
 
 本ガイドでは、静的ページジェネレータ [「 Hexo 」](https://hexo.io/)を利用した開発を想定しています。
 
+想定するシナリオでは、JenkinsのジョブでHexoコマンドを実行しますので、Jenkinsユーザでコマンドが実行できるように導入してください。
+
 ### Hexo 環境の導入手順
 
 Hexo を導入する仮想サーバ（ CentOS 7 ）で作業を行います。
@@ -496,7 +498,9 @@ Node.js 導入手順
 
 ```bash
 # node.js のバージョン管理ツール nvm を git から取得します。
-yum -y install git
+sudo yum -y install git
+
+# Jenkinsユーザで以下導入していきます。
 git clone https://github.com/creationix/nvm.git .nvm
 source ~/.nvm/nvm.sh
 
@@ -528,18 +532,18 @@ Hexo 導入手順
 
 ```bash
 # Node.js と一緒にインストールされたパッケージマネージャ npm を利用して hexo を導入します。
-  npm install hexo-cli -g
+npm install hexo-cli -g
 
 # Hexo の初期化。必要なファイル/フォルダが生成されます。
-  hexo init [ Hexo作業用ディレクトリ名 ]
-  cd [ ディレクトリ名 ]
+hexo init [ Hexo作業用ディレクトリ名 ]
+cd [ ディレクトリ名 ]
 
 # npm モジュールをインストールします。
-  npm install
+npm install
 
 # Hexo サーバを起動しプレビューを確認します。
-  hexo server
-  INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
+hexo server
+INFO  Hexo is running at http://0.0.0.0:4000/. Press Ctrl+C to stop.
 
 ```
   INFO にある` http://localhost:4000/ ` にアクセスするとプレビューが表示されます。
