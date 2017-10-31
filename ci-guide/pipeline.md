@@ -35,8 +35,7 @@ Mergeの場合は本番環境へデプロイ
 資産格納先である「GitHub Enterprise」へ開発チームがPull requestを行うのか、
 管理者がMergeを行うかでジョブが少々異なりますが、ほぼ同じジョブを繰り返す形になります。
 
-
-**事前準備**
+### 事前準備
 
 1．Hexo資産を作成し、「 GitHub Enterprise 」へ格納
 
@@ -54,23 +53,23 @@ Hexo資産の作成は[「2-3. Hexo導入手順」](ci-server.md)で紹介した
 
 ```bash
 # Hexo 資産を作成したディレクトリに入ります。
-$ cd { Hexo 資産を作成したディレクトリ }
+cd { Hexo 資産を作成したディレクトリ }
 
 # gitリポジトリ化
-$ git init
+git init
 
 # ローカルリポジトリのファイルをインデックスに追加。
 # 初回は全てのファイルをインデックスに追加して下さい。
-$ git add .
+git add .
 
 # コミット
-$git commit -m "[コミットのコメント記入]"
+git commit -m "[コミットのコメント記入]"
 
 # リモートリポジトリの追加
-$ git remote add origin  https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/ユーザ名/リポジトリ名
+git remote add origin  https://git-dXXXXrbo.jp-east-1.paas.cloud.global.fujitsu.com/ユーザ名/リポジトリ名
 
 # プッシュして ローカルリポジトリをリモートリポジトリへ反映させます。
-$git push origin master
+git push origin master
 
 ```
 
@@ -84,11 +83,36 @@ $git push origin master
 
 本ガイドでは Jenkins によって各テストツールを実行させていきます。
 
-以下、[「第6章 テストツールの導入」](test-tools.md)で紹介した各テストツールの実行コマンドが Jenkins ユーザから実行できるようパスが通っている前提で、Jenkins ジョブの作成を行います。
+以下、[「2-3. Hexo 導入手順」](ci-server.md)で紹介したHexoコマンドおよび[「第6章 テストツールの導入」](test-tools.md)で紹介した各テストツールの実行コマンドが Jenkins ユーザから実行できるようパスが通っている前提で、Jenkins ジョブの作成を行います。
 
-では、１つずつジョブを作成していきます。
+3．Jenkins 画面にて環境設定
 
-　<br/>
+Jenkins 画面でもパスの設定を行います。
+
+まずは、仮想サーバ ( CentOS 7 ) のJenkins ユーザのパスを `echo $PATH` で確認してください。
+
+確認したパスを Jenkins 画面に設定します。
+
+Jenkinsの管理 ＞ システムの設定 画面に入ります。
+
+【Jenkins システムの設定画面　環境変数設定】
+
+ ![Jenkins 環境変数](./image/jenkins-env-config.jpg)
+ 
+
+ 「グローバル プロパティ」欄の 環境変数にチェックを入れ、以下の部分を設定します。
+
+項目        | 設定内容
+:---------- | :--------------------------------
+キー        | PATH
+値          |  ${PATH}:  Jenkins ユーザのパスをコピー
+
+値設定の例：  
+${PATH}:/var/lib/jenkins/.rbenv/shims:/var/lib/jenkins/.rbenv/bin:/var/lib/jenkins/.nvm/versions/node/v6.11.4/bin:/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin
+
+以上の事前準備ができましたら、各ジョブを作成します。
+
+### 各ジョブの作成
 
 **1．資産取得（GitHub Enterprise から WorkSpace へ資産格納）**
 
@@ -130,11 +154,11 @@ $git push origin master
 >
 >         ※複数のブランチの設定やワイルドカードの仕様が可能。
 >
->         本書では、
+>         ここでは、
 >
->                　・ 開発チームが行う Pull request の場合 →「 */develop 」ブランチ
+>                開発チームが行う Pull request の場合 →「 */develop 」ブランチ
 >
->                　・ 管理者が行う merge の場合 →「 */master 」ブランチ
+>                管理者が行う merge の場合 →「 */master 」ブランチ
 >
 >          を設定します。
 >
@@ -185,10 +209,16 @@ $git push origin master
 >
 >    htmlファイル生成には `hexo generate` コマンドを実施します。
 >
+>    必要なnode_modulesが資産取得のジョブのワークスペースにはありませんので、シンボリックリンクで hexo 作業用ディレクトリから呼び出します。
+>
 >    先程と同じように、ジョブの設定 [ シェルの実行 ]のシェルスクリプトを以下のように記述します。
 >
 >    ```bash
 >    cd ../{ 資産取得のジョブ名 }
+>
+>    # hexo generateコマンド実行にはnode_modulesが必要になります
+>    ln -sf {hexo作業用ディレクトリ}/node_modules
+>
 >    hexo generate
 >    ```
 >
@@ -300,56 +330,48 @@ $git push origin master
 
    「Pull request用 Pipeline」のScript 記述例
 
-> ```bash
->
+> ```js
 >def p = env.payload.indexOf("action\":\"opened")
 >if(p != -1){
-> 　node{
->　　# 資産取得
->　　stage('Pullrequest資産取得'){
->　　　build job: '{ 1.資産取得のジョブ名 }'
->　　}
->　
->　　# Markdown 構文チェック
->　　stage('MD構文チェック'){
->　　　build job: '{ 2.Markdown 構文チェックのジョブ名 }'
->　　}
->　
->　　# htmlファイルを生成
->　　stage('html生成'){
->　　　build job: '{ 3.htmlファイル生成のジョブ名 }'
->　　}
->　　　
->　　# html構文チェック
->　　stage('html構文チェック'){
->　　　build job: '{ 4.html構文チェックのジョブ名 }'
->　　}
->　}
->
->　　# 管理者認証（Pipelineの一時停止）
->　　stage('管理者認証'){
->　　　input '続行しても大丈夫ですか？';
->　　}
->
->　node{
->　　# CF（開発）サーバ（テストサーバ）へデプロイ
->　　stage('CF開発格納'){
->　　　build job: '{ 5.テストサーバへデプロイのジョブ名 }'
->　　}
->　　　
->　　# アタックテスト（脆弱性検査）
->　　stage('脆弱性チェック'){
->　　　build job: ' { 6.アタックテスト（脆弱性検査）のジョブ名 } '
->　　}
->　　# 成功時メール報告
->　　stage('メール報告'){
->　　　build job: ' { 7.成功時メール報告のジョブ名 } '
->　　}
->　}
+>  node{
+>      // 資産取得
+>      stage('Pullrequest資産取得'){
+>           build job: '{ 1.資産取得のジョブ名 }'
+>      }
+>      // Markdown 構文チェック
+>      stage('MD構文チェック'){
+>           build job: '{ 2.Markdown 構文チェックのジョブ名 }'
+>      }
+>      // htmlファイルを生成
+>      stage('html生成'){
+>           build job: '{ 3.htmlファイル生成のジョブ名 }'
+>      }
+>      // html構文チェック
+>      stage('html構文チェック'){
+>           build job: '{ 4.html構文チェックのジョブ名 }'
+>      }
+>  }
+>     // 管理者認証（Pipelineの一時停止）
+>     stage('管理者認証'){
+>           input '続行しても大丈夫ですか？';
+>     }
+>  node{
+>     // CF（開発）サーバ（テストサーバ）へデプロイ
+>     stage('CF開発格納'){
+>           build job: '{ 5.テストサーバへデプロイのジョブ名 }'
+>     }
+>     // アタックテスト（脆弱性検査）
+>     stage('脆弱性チェック'){
+>           build job: ' { 6.アタックテスト（脆弱性検査）のジョブ名 } '
+>     }
+>     // 成功時メール報告
+>     stage('メール報告'){
+>           build job: ' { 7.成功時メール報告のジョブ名 } '
+>     }
+>  }
 >}
 >
 >```
->
 
 解説
 
@@ -359,7 +381,7 @@ webhookが発生するとGitHub側からpayloadのパーラメータが送られ
 
 このパーラメータでwebhookが発生したイベントが「pull request」かどうかを判定しています。
 
-```bash
+```js
 def p = env.payload.indexOf("action\":\"opened")
 if(p != -1){
      ----- 省略 -----
@@ -379,8 +401,8 @@ if(p != -1){
 
 例：inputで一時停止した際にメールを送信
 
-```bash
-# 管理者認証（Pipelineの一時停止）
+```js
+// 管理者認証（Pipelineの一時停止）
 stage('管理者認証'){
   mail (to: '{ メールアドレス }',
         subject: "Job '${env.JOB_NAME}' (${env.BUILD_NUMBER}) is waiting for input",
@@ -426,36 +448,36 @@ mergeした資産は公開用になりますので、テスト環境は本番環
 
   「merge用 Pipeline」のScript 記述例
 
-```bash
+```js
 def cl = env.payload.indexOf("action\":\"closed")
 def cls = env.payload.indexOf("merged\":true")
 
 if(cl != -1 && cls != -1){
-node{
-    stage('merge資産取得'){
-            build job: 'guide_source_master'
-        }
-        stage('MD構文チェック'){
-            build job: 'guide_md'
-        }
-        stage('html生成'){
-            build job: 'guide_html'
-        }
-        stage('html構文チェック'){
-            build job: 'guide_htmlhint'
-        }
-    }
-stage('管理者認証'){
-        input '続行しても大丈夫ですか？';
-            }
-node{
-        stage('CF-staging格納'){
-            echo '省略します'
-        }
-        stage('脆弱性チェック'){
-            echo '省略します'
-        }
-   }
+  node{
+      stage('merge資産取得'){
+           build job: '{ 資産取得のジョブ名 }'
+      }
+      stage('MD構文チェック'){
+           build job: { Markdown 構文チェックのジョブ名 }'
+      }
+      stage('html生成'){
+           build job: '{ htmlファイル生成のジョブ名 }'
+      }
+      stage('html構文チェック'){
+           build job: '{ html構文チェックのジョブ名 }'
+      }
+  }
+      stage('管理者認証'){
+          input '続行しても大丈夫ですか？';
+      }
+  node{
+      stage('CF-staging格納'){
+           build job: '{ CF-stagingへデプロイのジョブ名 }'
+          }
+      stage('脆弱性チェック'){
+           build job: ' { アタックテスト（脆弱性検査）のジョブ名 } '
+          }
+     }
 }
 ```
 
