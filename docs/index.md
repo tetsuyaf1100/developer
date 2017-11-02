@@ -25,7 +25,7 @@ Jenkins の Pipeline 機能を用いて各種タスクを自動実行します�
 
 [IaaS API ユーザーズガイド](https://k5-doc.jp-east-1.paas.cloud.global.fujitsu.com/doc/jp/iaas/document/api-user-guide/)
 にあるシェルスクリプトをベースにした
-[IaaSコマンドラインユーティリティ](https://github.com/k5-community/developer/tree/master/utils/iaas)
+[IaaSコマンドラインユーティリティー](https://github.com/k5-community/developer/tree/master/utils/iaas)
 を公開しています。
 
 # K5 Tips
